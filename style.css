@@ -1,0 +1,521 @@
+:root{
+    --ink:#100D0C;          /* el velo que se agujerea */
+    --gold:#F2A93B;         /* único color de acento del sitio */
+    --bone:#F6F1E8;
+    --deep:#2B0F08;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Archivo',system-ui,sans-serif;
+    background:var(--deep);
+    color:var(--bone);
+    overflow:hidden;              /* el JS lo libera al terminar */
+  }
+
+  /* ---------- 1. LA PÁGINA REAL (vive detrás, ya renderizada) ---------- */
+  #page{
+    min-height:100%;
+    background:
+      radial-gradient(120% 90% at 50% 8%, #7A1E08 0%, #3A1005 45%, #180705 100%);
+    display:flex;flex-direction:column;
+  }
+  .page-inner{
+    flex:1;display:flex;flex-direction:column;justify-content:center;
+    padding:clamp(24px,6vw,96px);max-width:1100px;margin:0 auto;width:100%;
+  }
+  .eyebrow{
+    font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:1.5rem;
+  }
+  h1{
+    font-family:'Fraunces',Georgia,serif;font-weight:300;
+    font-size:clamp(2.6rem,7vw,5.4rem);line-height:1.1;letter-spacing:-.02em;
+  }
+  h1 em{font-style:italic;font-weight:600;color:var(--gold)}
+  .lede{
+    margin-top:1.6rem;max-width:44ch;font-size:clamp(1rem,1.6vw,1.15rem);
+    line-height:1.65;color:#E9DCCC;
+  }
+  .meta{
+    margin-top:3rem;display:flex;flex-wrap:wrap;gap:2.5rem;
+    border-top:1px solid rgba(246,241,232,.18);padding-top:1.5rem;
+  }
+  .meta div span{display:block;font-size:.7rem;letter-spacing:.2em;
+    text-transform:uppercase;color:rgba(246,241,232,.5);margin-bottom:.35rem}
+  .meta div strong{font-weight:500;font-size:1rem}
+  #replay{
+    position:fixed;right:20px;bottom:20px;z-index:50;
+    font:500 .78rem/1 'Archivo',sans-serif;letter-spacing:.06em;
+    padding:12px 18px;border:1px solid rgba(246,241,232,.3);
+    border-radius:999px;background:rgba(0,0,0,.35);color:var(--bone);
+    cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s;
+    backdrop-filter:blur(6px);
+  }
+  #replay.show{opacity:1;pointer-events:auto}
+  #replay:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* ---------- 2. EL VELO (SVG a pantalla completa con el hueco) ---------- */
+  #veil{
+    position:fixed;inset:0;width:100%;height:100%;
+    z-index:20;display:block;
+    touch-action:none;                 /* que el dedo no scrollee la página */
+  }
+  #veil-fill{fill:var(--ink)}
+  #solid-use{fill:var(--bone)}
+  #text-use,#text-use-2{fill:var(--bone)}
+  #hint{
+    position:fixed;left:0;right:0;bottom:40px;z-index:30;text-align:center;
+    font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+    color:rgba(246,241,232,.55);pointer-events:none;
+    animation:breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.35}50%{opacity:.9}}
+
+  @media (prefers-reduced-motion:reduce){
+    #veil-fill{fill:var(--ink)}
+  #solid-use{fill:var(--bone)}
+  #text-use,#text-use-2{fill:var(--bone)}
+  #hint{animation:none}
+  .hero-hint span{animation:none}
+  }
+
+/* ======================================================================
+   LO QUE SIGUE ES NUEVO (header, mega menú, vistas, footer).
+   Ni una sola línea de arriba fue tocada, y no se define ningún color
+   nuevo — todo usa las variables que ya existen (--gold, --bone,
+   --deep, --ember, --ink).
+   ====================================================================== */
+
+:root{
+  --header-h: 84px;    /* JS la ajusta al alto real del header */
+  --hairline: rgba(246,241,232,.18); /* mismo tono que ya usa .meta */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* curva propia, no el "ease" plano de CSS */
+  --schedule-accent: #061d33; /* vinotinto, para los NÚMEROS de los horarios */
+}
+
+/* ---------- Header ---------- */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 15;           /* siempre por debajo del velo (z-index 20) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px clamp(20px, 5vw, 56px);
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: -12px; /* un poco más a la izquierda, pegado al borde */
+  transition: transform .5s var(--ease-out);
+}
+.brand-mark{
+  height: clamp(45px, 7.7vw, 91px); /* 0.7x el tamaño base original */
+  width: auto;
+  fill: var(--bone);
+}
+/* LOGO_2.svg trae su propio color grabado adentro (.st0 = #231f20,
+   pensado para fondo claro). Lo forzamos a --bone para que se vea
+   sobre el header oscuro, sin tocar el archivo SVG original. */
+.brand-mark .st0{
+  fill: var(--bone) !important;
+}
+
+/* Flechita "volver al inicio": position:absolute para que NO
+   empuje el logo hacia la derecha (ya no reserva espacio en el
+   flex del header). Solo es visible fuera de Inicio. */
+.back-home{
+  position: absolute;
+  left: clamp(20px, 5vw, 56px);
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 4px;
+  font: 500 .78rem/1 'Archivo', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--bone);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-6px);
+  transition: opacity .2s var(--ease-out), transform .2s var(--ease-out);
+}
+.back-home.visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+.back-home:hover{ color: var(--gold); }
+.back-home:active{ transform: translateY(-50%) scale(0.97); }
+@media (max-width: 480px){
+  .back-home-label{ display: none; }
+}
+
+/* ---------- Menú (escritorio) ---------- */
+.menu-toggle{
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 4px;
+  font: 500 .78rem/1 'Archivo', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+.menu-toggle:active{ transform: scale(0.97); }
+.menu-toggle-icon{ display: flex; flex-direction: column; gap: 5px; }
+.menu-toggle-icon span{
+  display: block; width: 22px; height: 2px; background: var(--bone);
+  transition: transform .3s var(--ease-out), opacity .3s var(--ease-out);
+}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(1){ transform: translateY(7px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(2){ opacity: 0; }
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
+
+.menu-panel ul{
+  list-style: none; display: flex; align-items: center; gap: 4px; margin: 0; padding: 0;
+}
+.menu-panel a{
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 10px 14px; border-radius: 4px;
+  font: 500 .78rem/1 'Archivo', sans-serif;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--bone);
+  transition: background .15s var(--ease-out), color .15s var(--ease-out);
+}
+.menu-panel a[data-index]::before{
+  content: attr(data-index);
+  font-size: .68rem;
+  color: var(--gold);
+  opacity: .7;
+}
+.menu-panel a:hover{ background: rgba(246,241,232,.1); color: var(--gold); }
+
+/* ---------- Menú (móvil) ---------- */
+@media (max-width: 760px){
+  .menu-toggle{ display: flex; }
+  .menu-panel{
+    position: absolute; top: 100%; right: clamp(20px, 5vw, 56px); margin-top: 12px;
+    background: var(--deep); border-radius: 8px; overflow: hidden; min-width: 220px;
+    transform-origin: top right; opacity: 0; transform: scale(.96) translateY(-8px);
+    pointer-events: none; transition: opacity .22s var(--ease-out), transform .22s var(--ease-out);
+    box-shadow: 0 20px 40px rgba(0,0,0,.4);
+    border: 1px solid var(--hairline);
+  }
+  .menu-panel.open{ opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  .menu-panel ul{ flex-direction: column; align-items: stretch; padding: 8px 0; }
+  .menu-panel a{
+    padding: 14px 24px; font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 1.25rem; text-transform: none; color: var(--bone); border-radius: 0;
+  }
+  .menu-panel a[data-index]::before{ font-size: .72rem; }
+  .menu-panel a:hover{ background: rgba(246,241,232,.08); padding-left: 30px; }
+}
+
+/* ---------- Mega menú ---------- */
+/* Ancho completo, 70% del alto (queda un 30% de la página visible
+   abajo). Solo uno puede estar .open — lo controla menu.js. */
+.mega-menu{
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  gap: clamp(24px, 5vw, 64px);
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 5vw, 56px);
+  background: var(--deep);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 40px 60px -20px rgba(0,0,0,.5);
+  z-index: 14;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity .18s var(--ease-out), transform .18s var(--ease-out);
+  overflow-y: auto;
+}
+.mega-menu.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.mega-col{ display: flex; flex-direction: column; gap: 14px; min-width: 200px; }
+.mega-col-title{
+  font: 500 .68rem/1 'Archivo', sans-serif;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); opacity: .85; margin-bottom: 4px;
+}
+.mega-col a{
+  font-family: 'Fraunces', serif; font-weight: 600;
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  color: var(--bone); transition: color .15s var(--ease-out);
+}
+.mega-col a:hover{ color: var(--gold); }
+
+.mega-feature{
+  flex: 1 1 auto; max-width: 420px; padding: 24px;
+  background: rgba(246,241,232,.05); border-radius: 8px;
+}
+.mega-feature p{ color: #E9DCCC; line-height: 1.6; margin: 0; }
+
+@media (max-width: 760px){
+  .mega-menu{ display: none; } /* depende de :hover, no aplica en móvil */
+}
+
+/* El resto del sitio ya respeta esta preferencia (intro y hero). El
+   header, el menú y el mega menú son nuevos y no la tenían: aquí
+   cambiamos sus transiciones a instantáneas, sin quitar el cambio
+   de opacidad/color que ayuda a entender qué pasó. */
+@media (prefers-reduced-motion: reduce){
+  .back-home,
+  .menu-toggle-icon span,
+  .menu-panel,
+  .mega-menu,
+  .menu-panel a,
+  .mega-col a{
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------- "Ya no hay más": el menú crece 15% ----------
+   site.js agrega body.hero-at-end cuando el usuario llega al final
+   del recorrido del hero (nada más para revelar, solo el video en
+   loop). El logo y el menú crecen un poco para que sea obvio que ya
+   no hay que seguir bajando, hay que buscar en el menú. Mismo
+   momento exacto que el texto de los horarios (ver .hero-schedule
+   más abajo) — misma señal, un solo instante. */
+body.hero-at-end .brand{
+  transform: scale(1.15);
+  transform-origin: left center;
+}
+@media (min-width: 761px){
+  body.hero-at-end .menu-panel{
+    transform: scale(1.15);
+    transform-origin: right center;
+    transition: transform .5s var(--ease-out);
+  }
+}
+body.hero-at-end .menu-toggle{
+  transform: scale(1.15);
+  transform-origin: right center;
+  transition: transform .5s var(--ease-out);
+}
+
+/* ---------- Vistas ---------- */
+/* Cada sección vive en su propio .view; solo la .active se muestra.
+   "Navegar" es solo cambiar cuál .view está visible — misma pestaña,
+   sin recargar nada. */
+#page > main{ flex: 1; display: flex; flex-direction: column; }
+.view{ display: none; flex: 1; flex-direction: column; }
+.view.active{ display: flex; }
+
+/* ---------- Footer ---------- */
+.site-footer{
+  padding: 24px clamp(20px, 5vw, 56px);
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+}
+.site-footer p{
+  margin: 0;
+  font: 500 .7rem/1 'Archivo', sans-serif;
+  letter-spacing: .06em;
+  color: rgba(246,241,232,.5);
+}
+.site-footer a{ color: var(--gold); }
+.site-footer a:hover{ text-decoration: underline; }
+
+/* ---------- Versículo (hero) ---------- */
+.verse-lead{
+  display: block;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 400;
+  font-size: clamp(.95rem, 1.6vw, 1.1rem);
+  font-style: italic;
+  color: #E9DCCC;
+  margin-bottom: .6em;
+}
+.verse-cite{
+  margin-top: 1.2rem;
+  font-size: .72rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ---------- Botón "Repetir intro" ----------
+   Lo ocultamos por CSS en vez de borrarlo del HTML: script.js
+   depende de que este botón exista (hace getElementById('replay') y
+   le pone un listener), así que quitarlo del HTML rompería la intro.
+   Esto lo deja invisible y no-clicable sin tocar ni una línea de la
+   intro. */
+#replay{
+  display: none !important;
+}
+
+/* ---------- Hero: foto → video, con versículo y horarios flotando ----------
+   .hero-reveal ocupa todo el alto disponible (es el único hijo de
+   .view#view-inicio, que ya es flex:1). Adentro se apilan cuatro
+   capas: la foto, el video (crossfade entre ambos con --reveal), el
+   versículo flotante (.hero-verse, sin fondo, entra y sale con
+   --reveal/--exit) y los horarios (.hero-schedule, aparecen al
+   final y se quedan). site.js controla --reveal y --exit con la
+   rueda del mouse o el dedo. */
+.hero-reveal{
+  flex: 1;              /* <- esto faltaba: sin esto, colapsaba a 0px de alto */
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  min-height: 320px;    /* nunca queda demasiado chico en pantallas raras */
+}
+
+.hero-photo{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: calc(1 - var(--fade, 0));
+}
+.hero-photo img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center 65%;
+}
+
+/* La foto de los pastores se desvanece a la vez que aparece el
+   video, pero con su PROPIO ritmo (--fade), más lento y espaciado
+   que el movimiento del versículo (--reveal): así el crossfade se
+   siente gradual y natural, no un corte rápido. El video queda
+   encima en el z-index para que la mezcla se vea limpia mientras
+   ambos tienen opacidad intermedia. site.js ya actualiza --reveal,
+   --exit y --fade suavizados cuadro a cuadro (sin transition CSS
+   aquí: tener las dos cosas a la vez sumaba un segundo suavizado
+   encima del de JS y se sentía menos preciso, no más suave). */
+.hero-video{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: var(--fade, 0);
+}
+.hero-video video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Versículo: flota sobre el video, sin panel de fondo ----------
+   Entra desde abajo hasta el centro de la pantalla (--reveal 0→1) y
+   sigue subiendo hasta salir por arriba mientras se desvanece
+   (--exit 0→1). Sin gradiente detrás: la lectura se protege con
+   text-shadow en vez de una caja de color. */
+.hero-verse{
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 clamp(24px, 6vw, 96px);
+  /* Al llenar todo el contenedor con inset:0, un translateY en % se
+     mueve relativo a su propia altura, que es la del contenedor
+     completo — así queda bien escondido arriba y abajo sin importar
+     el tamaño de pantalla (a diferencia de usar vh, que no calzaba
+     con el alto real de .hero-reveal). */
+  transform: translateY(calc((1 - var(--reveal, 0)) * 130% - var(--exit, 0) * 130%));
+  opacity: calc(1 - var(--exit, 0));
+}
+.hero-verse .eyebrow,
+.hero-verse .verse,
+.hero-verse .verse-cite{
+  text-shadow: 0 2px 20px rgba(0,0,0,.7), 0 1px 4px rgba(0,0,0,.85);
+}
+
+/* ---------- Horarios: aparecen al final, abajo, y se quedan ----------
+   Se desvanecen hacia adentro a la vez que el versículo se va
+   (mismo --exit), y quedan como la información permanente sobre el
+   video en loop. Tampoco tienen panel de fondo, solo la línea
+   divisoria fina que ya existía en .meta. */
+.hero-schedule{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: clamp(28px, 6vw, 64px) clamp(24px, 6vw, 96px) clamp(32px, 7vw, 80px);
+  opacity: var(--exit, 0);
+  transform: translateY(calc((1 - var(--exit, 0)) * 16px));
+  pointer-events: none;
+}
+.hero-schedule .lede,
+.hero-schedule .meta strong,
+.hero-schedule .meta span{
+  text-shadow: 0 2px 16px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.85);
+}
+
+/* Tamaño de letra grande, a la altura del versículo, con transición
+   suave. El tamaño "normal" de abajo es el que se ve mientras el
+   usuario todavía puede seguir bajando; cuando site.js detecta que
+   ya se llegó al final (nada más para mostrar) agrega
+   body.hero-at-end, y AMBAS cosas crecen juntas: este texto y el
+   menú de arriba (ver .brand / .menu-panel / .menu-toggle más
+   abajo) — la misma señal, al mismo tiempo, de "esto es todo, usa
+   el menú". */
+.hero-schedule .lede{
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  transition: font-size .6s var(--ease-out);
+}
+.hero-schedule .lede em{
+  font-style: italic;
+  font-weight: 600;
+  color: var(--gold);
+}
+.hero-schedule .meta strong{
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: var(
+nada
+
+  )
+  ;
+  transition: font-size .6s var(--ease-out);
+}
+body.hero-at-end .hero-schedule .lede{
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+}
+body.hero-at-end .hero-schedule .meta strong{
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
+.hero-hint{
+  position: absolute;
+  left: 0; right: 0; bottom: 18px;
+  z-index: 4;
+  text-align: center;
+  font-size: .7rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgba(246,241,232,.6);
+  pointer-events: none;
+  opacity: calc(1 - var(--reveal, 0));
+}
+/* La respiración vive en un span aparte: una animación con
+   keyframes de opacidad pisa cualquier opacidad puesta en el mismo
+   elemento (pasaba antes: el hint nunca llegaba a apagarse del
+   todo). Así, el fade de salida multiplica a la respiración en vez
+   de competir con ella. */
+.hero-hint span{
+  display: inline-block;
+  animation: breathe 2.6s ease-in-out infinite;
+}
