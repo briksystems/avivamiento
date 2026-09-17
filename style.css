@@ -91,7 +91,7 @@
   --header-h: 84px;    /* JS la ajusta al alto real del header */
   --hairline: rgba(246,241,232,.18); /* mismo tono que ya usa .meta */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* curva propia, no el "ease" plano de CSS */
-  --schedule-accent: #061d33; /* vinotinto, para los NÚMEROS de los horarios */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1); /* con rebote, para cambios que se deben notar */
 }
 
 /* ---------- Header ---------- */
@@ -130,10 +130,12 @@
 
 /* Flechita "volver al inicio": position:absolute para que NO
    empuje el logo hacia la derecha (ya no reserva espacio en el
-   flex del header). Solo es visible fuera de Inicio. */
+   flex del header). Centrada, para no pisar ni el logo (izquierda)
+   ni el menú (derecha), sin importar el ancho de ninguno de los
+   dos. Solo es visible fuera de Inicio. */
 .back-home{
   position: absolute;
-  left: clamp(20px, 5vw, 56px);
+  left: 50%;
   top: 50%;
   display: flex;
   align-items: center;
@@ -148,16 +150,16 @@
   color: var(--bone);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%) translateX(-6px);
+  transform: translate(-50%, -50%) translateY(-6px);
   transition: opacity .2s var(--ease-out), transform .2s var(--ease-out);
 }
 .back-home.visible{
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(-50%) translateX(0);
+  transform: translate(-50%, -50%);
 }
 .back-home:hover{ color: var(--gold); }
-.back-home:active{ transform: translateY(-50%) scale(0.97); }
+.back-home:active{ transform: translate(-50%, -50%) scale(0.97); }
 @media (max-width: 480px){
   .back-home-label{ display: none; }
 }
@@ -288,28 +290,33 @@
   }
 }
 
-/* ---------- "Ya no hay más": el menú crece 15% ----------
+/* ---------- "Ya no hay más": el menú crece ----------
    site.js agrega body.hero-at-end cuando el usuario llega al final
    del recorrido del hero (nada más para revelar, solo el video en
-   loop). El logo y el menú crecen un poco para que sea obvio que ya
+   loop). El logo y el menú crecen bastante y en negrita, con un
+   pequeño rebote al final, para que sea imposible no notar que ya
    no hay que seguir bajando, hay que buscar en el menú. Mismo
    momento exacto que el texto de los horarios (ver .hero-schedule
    más abajo) — misma señal, un solo instante. */
 body.hero-at-end .brand{
-  transform: scale(1.15);
+  transform: scale(1.35);
   transform-origin: left center;
+  transition: transform .8s var(--ease-pop);
 }
 @media (min-width: 761px){
   body.hero-at-end .menu-panel{
-    transform: scale(1.15);
+    transform: scale(1.35);
     transform-origin: right center;
-    transition: transform .5s var(--ease-out);
+    transition: transform .8s var(--ease-pop);
+  }
+  body.hero-at-end .menu-panel a{
+    font-weight: 700;
   }
 }
 body.hero-at-end .menu-toggle{
-  transform: scale(1.15);
+  transform: scale(1.35);
   transform-origin: right center;
-  transition: transform .5s var(--ease-out);
+  transition: transform .8s var(--ease-pop);
 }
 
 /* ---------- Vistas ---------- */
@@ -372,7 +379,10 @@ body.hero-at-end .menu-toggle{
    final y se quedan). site.js controla --reveal y --exit con la
    rueda del mouse o el dedo. */
 .hero-reveal{
-  flex: 1;              /* <- esto faltaba: sin esto, colapsaba a 0px de alto */
+  height: 100vh;         /* fija a una pantalla completa: sin esto, si */
+  flex-shrink: 0;        /* algo se agrega después dentro de la misma */
+                         /* vista, flexbox lo achicaría en vez de */
+                         /* empujarlo hacia abajo. */
   position: relative;
   overflow: hidden;
   touch-action: none;
@@ -484,11 +494,6 @@ body.hero-at-end .menu-toggle{
 }
 .hero-schedule .meta strong{
   font-size: clamp(1.1rem, 2vw, 1.4rem);
-  color: var(
-nada
-
-  )
-  ;
   transition: font-size .6s var(--ease-out);
 }
 body.hero-at-end .hero-schedule .lede{
@@ -518,4 +523,96 @@ body.hero-at-end .hero-schedule .meta strong{
 .hero-hint span{
   display: inline-block;
   animation: breathe 2.6s ease-in-out infinite;
+}
+
+/* ---------- Botón dorado (uso general) ----------
+   Texto oscuro encima del dorado porque el dorado es un color
+   claro, texto claro encima se leería mal. */
+.btn-gold{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--ink);
+  font: 700 .82rem/1 'Archivo', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: transform .15s var(--ease-out), background .15s var(--ease-out);
+}
+.btn-gold:hover{ background: #F7BE5F; }
+.btn-gold:active{ transform: scale(0.97); }
+
+/* ---------- Aviso de eventos, en Inicio ----------
+   Vive DESPUÉS de .hero-reveal, dentro de la misma vista Inicio. El
+   banner y el botón son solo un anuncio: el botón lleva a Reuniones
+   y de ahí salta directo a #eventos-section (ver site.js), donde
+   están el detalle y los eventos anteriores. */
+.upcoming-events{
+  padding: clamp(56px, 9vw, 96px) clamp(24px, 6vw, 96px);
+}
+.upcoming-events-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.upcoming-events-inner .eyebrow{ margin-bottom: 1.2rem; }
+.upcoming-events-inner .event-banner{ margin-bottom: 1.4rem; }
+
+@media (prefers-reduced-motion: reduce){
+  .btn-gold{ transition-duration: .01ms !important; }
+}
+
+/* ---------- Eventos (dentro de la vista Reuniones) ----------
+   Ya no es una ventana emergente: es contenido normal de la vista
+   Reuniones, debajo de los horarios. .page-inner de esa vista usa
+   justify-content:center y flex:1 sin min-height, así que al
+   agregar esto después simplemente se acomoda a su tamaño natural
+   y toda la vista crece hacia abajo (a diferencia de .hero-reveal
+   en Inicio, que sí necesitaba una altura fija). */
+.events-section{
+  padding: 0 clamp(24px, 6vw, 96px) clamp(56px, 9vw, 96px);
+}
+.events-section-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(40px, 6vw, 64px);
+}
+.events-block .eyebrow{ margin-bottom: 1.2rem; }
+
+.event-banner{
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1920 / 417;
+  margin-bottom: 1.4rem;
+}
+.event-banner img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Blanco y negro solo en el aviso de Inicio, donde el banner es de
+   fondo y no debe competir con el resto de la página. En la propia
+   página de eventos (dentro de Reuniones) se queda a color, tal
+   como se mandó. */
+.upcoming-events .event-banner img{
+  filter: grayscale(1);
+}
+.event-title{
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+  margin-bottom: .4rem;
+}
+.event-desc{
+  color: #E9DCCC;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+.events-placeholder{
+  color: rgba(246,241,232,.55);
+  font-style: italic;
 }

@@ -145,6 +145,14 @@
     el.addEventListener('click', (e) => {
       e.preventDefault();
       switchView(el.dataset.view);
+      // Algunos accesos (como el aviso de eventos en Inicio) no solo
+      // cambian de vista, también apuntan a una sección puntual
+      // dentro de ella (ej. el detalle de eventos en Reuniones).
+      const scrollTargetId = el.dataset.scrollTo;
+      if (scrollTargetId) {
+        const target = document.getElementById(scrollTargetId);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 
