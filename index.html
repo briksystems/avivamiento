@@ -130,19 +130,9 @@
   <div id="mega-container" class="mega-container">
     <div class="mega-menu" data-mega-panel="reuniones">
       <div class="mega-col">
-        <span class="mega-col-title">Horarios</span>
-        <a href="#reuniones" data-view="reuniones">Viernes · 7:00 p.m.</a>
-        <a href="#reuniones" data-view="reuniones">Domingo · 8:00 a.m.</a>
-        <a href="#reuniones" data-view="reuniones">Domingo · 10:30 a.m.</a>
-      </div>
-      <div class="mega-col">
         <span class="mega-col-title">Eventos</span>
         <a href="#reuniones" data-view="reuniones">Próximos eventos</a>
         <a href="#reuniones" data-view="reuniones">Eventos anteriores</a>
-      </div>
-      <div class="mega-feature">
-        <span class="mega-col-title">Destacado</span>
-        <p>Tres horarios cada semana, para que siempre haya un lugar para ti.</p>
       </div>
     </div>
 
@@ -150,15 +140,7 @@
       <div class="mega-col">
         <span class="mega-col-title">Nosotros</span>
         <a href="#nosotros" data-view="nosotros">Nuestra historia</a>
-        <a href="#nosotros" data-view="nosotros">Liderazgo</a>
-      </div>
-      <div class="mega-col">
-        <span class="mega-col-title">Más</span>
-        <a href="#nosotros" data-view="nosotros">Visión y valores</a>
-      </div>
-      <div class="mega-feature">
-        <span class="mega-col-title">Destacado</span>
-        <p>Contenido disponible muy pronto.</p>
+        <a href="#nosotros" data-view="nosotros">Visión y misión</a>
       </div>
     </div>
 
@@ -167,10 +149,6 @@
         <span class="mega-col-title">Contacto</span>
         <a href="#contacto" data-view="contacto">Escríbenos</a>
         <a href="#contacto" data-view="contacto">Redes sociales</a>
-      </div>
-      <div class="mega-feature">
-        <span class="mega-col-title">Destacado</span>
-        <p>Formulario de contacto disponible muy pronto.</p>
       </div>
     </div>
   </div>
@@ -189,7 +167,7 @@
             muted
             loop
             playsinline
-            preload="auto"
+            preload="metadata"
             aria-hidden="true"></video>
         </div>
 
@@ -231,8 +209,6 @@
     <div class="view" id="view-reuniones" data-view-id="reuniones">
       <div class="page-inner">
         <p class="eyebrow">Reuniones</p>
-        <h1>Un lugar para<br>cada <em>semana.</em></h1>
-        <p class="lede">Tres horarios, la misma bienvenida.</p>
         <div class="meta">
           <div><span>Viernes</span><strong>7:00 p.m.</strong></div>
           <div><span>Domingo</span><strong>8:00 a.m.</strong></div>
@@ -263,7 +239,6 @@
       <div class="page-inner">
         <p class="eyebrow">Nosotros</p>
         <h1>Nuestra <em>historia.</em></h1>
-        <p class="lede">Próximamente.</p>
       </div>
     </div>
 
@@ -271,7 +246,6 @@
       <div class="page-inner">
         <p class="eyebrow">Contacto</p>
         <h1>Hablemos.</h1>
-        <p class="lede">Próximamente.</p>
       </div>
     </div>
   </main>
@@ -284,7 +258,7 @@
 <button id="replay">Repetir intro</button>
 
 <!-- ========= EL VELO CON EL HUECO EN FORMA DE LOGO ========= -->
-<svg id="veil" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<svg id="veil" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
   <defs>
     <!-- El logo se define UNA sola vez. Se usa dos veces abajo. -->
     <g id="logo-shapes">
@@ -340,7 +314,7 @@
       <!-- blanco = el velo SE VE -->
       <rect x="-2000" y="-2000" width="20000" height="20000" fill="#fff"/>
       <!-- JS baja este fill de #fff (sin hueco) a #000 (hueco total) -->
-      <use id="hole-use" href="#mark-fill" fill="#fff"/>
+      <use id="hole-use" href="#mark-fill" xlink:href="#mark-fill" fill="#fff"/>
     </mask>
   </defs>
 
@@ -349,11 +323,11 @@
         fill="#100D0C" mask="url(#logo-hole)"/>
 
   <!-- capa 2: el CÍRCULO pintado sólido, encima. JS lo desvanece -> se abre. -->
-  <use id="solid-use" href="#mark"/>
+  <use id="solid-use" href="#mark" xlink:href="#mark"/>
 
   <!-- capa 3: texto (wordmark + tagline). Solo se desvanece, nunca es ventana. -->
-  <use id="text-use" href="#wordmark"/>
-  <use id="text-use-2" href="#tagline"/>
+  <use id="text-use" href="#wordmark" xlink:href="#wordmark"/>
+  <use id="text-use-2" href="#tagline" xlink:href="#tagline"/>
 </svg>
 
 <p id="hint">Desliza para entrar</p>

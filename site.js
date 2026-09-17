@@ -206,6 +206,14 @@
   let shown = 0;
   let rafId = null;
   let lastTouchY = null;
+  // Momento (performance.now()) en que target llegó al final por
+  // última vez. Mientras esté dentro de PAUSE_MS de ese instante,
+  // seguimos "atrapando" el scroll hacia abajo aunque target ya no
+  // pueda subir más: eso da la sensación de pausa justo cuando
+  // aparecen los horarios completos, antes de soltar la página
+  // hacia la sección de eventos. Al subir no hay pausa, sube directo.
+  let reachedEndAt = null;
+  const PAUSE_MS = 550;
 
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
@@ -249,6 +257,11 @@
   function addDelta(fraction) {
     const before = target;
     target = clamp(target + fraction, 0, MAX_PROGRESS);
+    if (target >= MAX_PROGRESS && before < MAX_PROGRESS) {
+      reachedEndAt = performance.now();
+    } else if (target < MAX_PROGRESS) {
+      reachedEndAt = null;
+    }
     if (target !== before && rafId === null) {
       rafId = requestAnimationFrame(render);
     }
@@ -256,17 +269,21 @@
 
   // Mientras el recorrido no ha terminado (target < 2) y el usuario
   // baja el mouse, capturamos el scroll (no se mueve la página, sube
-  // o sale el panel). Si ya terminó, soltamos el scroll. Si el
-  // usuario sube el mouse antes del final, lo dejamos "regresar"
-  // antes de scrollear la página hacia arriba. Se compara contra
-  // "target" (a dónde vamos), no "shown" (lo que ya se ve), para que
-  // no se corte la captura mientras el suavizado todavía va llegando.
+  // o sale el panel). Si ya terminó, soltamos el scroll, PERO si
+  // acabamos de llegar al final hace menos de PAUSE_MS, lo seguimos
+  // capturando (sin mover nada) para que se sienta la pausa antes de
+  // soltar hacia la página. Al subir no hay pausa: "target > 0" ya
+  // deja reaccionar de una.
+  function withinPause() {
+    return reachedEndAt !== null && (performance.now() - reachedEndAt) < PAUSE_MS;
+  }
+
   heroReveal.addEventListener('wheel', (e) => {
     const goingDown = e.deltaY > 0;
-    const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
+    const shouldCapture = (goingDown && (target < MAX_PROGRESS || withinPause())) || (!goingDown && target > 0);
     if (shouldCapture) {
       e.preventDefault();
-      addDelta(e.deltaY / WHEEL_TO_END);
+      if (target < MAX_PROGRESS || !goingDown) addDelta(e.deltaY / WHEEL_TO_END);
     }
   }, { passive: false });
 
@@ -279,10 +296,10 @@
     const y = e.touches[0].clientY;
     const delta = lastTouchY - y; // positivo = dedo sube = "baja" el contenido
     const goingDown = delta > 0;
-    const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
+    const shouldCapture = (goingDown && (target < MAX_PROGRESS || withinPause())) || (!goingDown && target > 0);
     if (shouldCapture) {
       e.preventDefault();
-      addDelta(delta / TOUCH_TO_END);
+      if (target < MAX_PROGRESS || !goingDown) addDelta(delta / TOUCH_TO_END);
     }
     lastTouchY = y;
   }, { passive: false });
