@@ -391,7 +391,7 @@ body.hero-at-end .menu-toggle{
 
 .hero-photo{
   position: absolute;
-  top: calc(var(--header-h, 84px) - 76px);
+  top: calc(var(--header-h, 84px) - 110px);
   left: 0;
   right: 0;
   bottom: 0;
@@ -458,6 +458,10 @@ body.hero-at-end .menu-toggle{
 .hero-verse .verse,
 .hero-verse .verse-cite{
   text-shadow: 0 2px 20px rgba(0,0,0,.7), 0 1px 4px rgba(0,0,0,.85);
+}
+.hero-verse .eyebrow,
+.hero-verse .verse-cite{
+  font-size: 1.4rem;
 }
 
 /* ---------- Horarios: aparecen al final, abajo, y se quedan ----------
