@@ -13,7 +13,7 @@
     overflow:hidden;              /* el JS lo libera al terminar */
   }
 
-  /* ---------- 1. LA PÁGINA REAL (vive detrás, ya renderizada) ---------- */
+  /* la página de fondo, ya renderizada */
   #page{
     min-height:100%;
     background:
@@ -24,6 +24,45 @@
     flex:1;display:flex;flex-direction:column;justify-content:center;
     padding:clamp(24px,6vw,96px);max-width:1100px;margin:0 auto;width:100%;
   }
+
+  /* ---------- Paradas: varias pantallas seguidas dentro de una
+     misma sección (Conócenos, Ministerios, Visítanos, etc.) ----------
+     Mismo motor que el hero de Inicio, pero genérico: site.js
+     (initStopSections) mueve cada .stop con la rueda o el dedo,
+     una parada a la vez, con su pausa al llegar a cada una. */
+  .stops{
+    position: relative;
+    height: calc(100vh - var(--header-h, 84px));
+    overflow: hidden;
+    touch-action: none;
+  }
+  .stop{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 clamp(24px, 6vw, 96px);
+    background:
+      radial-gradient(120% 90% at 50% 8%, #7A1E08 0%, #3A1005 45%, #180705 100%);
+  }
+  .stop-inner{
+    max-width: 1100px;
+    width: 100%;
+  }
+  /* contenido por defecto de una parada mientras no tiene nada más
+     que un título: dorado, misma tipografía que "mi Espíritu" en
+     el versículo grande de Inicio. */
+  .stop-title{
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(2.6rem, 7vw, 5.4rem);
+    line-height: 1.1;
+    color: var(--gold);
+    text-align: center;
+  }
+
   .eyebrow{
     font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
     color:var(--gold);margin-bottom:1.5rem;
@@ -55,7 +94,7 @@
   #replay.show{opacity:1;pointer-events:auto}
   #replay:hover{border-color:var(--gold);color:var(--gold)}
 
-  /* ---------- 2. EL VELO (SVG a pantalla completa con el hueco) ---------- */
+  /* el velo con el hueco (SVG a pantalla completa) */
   #veil{
     position:fixed;inset:0;width:100%;height:100%;
     z-index:20;display:block;
@@ -77,21 +116,15 @@
   #solid-use{fill:var(--bone)}
   #text-use,#text-use-2{fill:var(--bone)}
   #hint{animation:none}
-  .hero-hint span{animation:none}
   }
 
-/* ======================================================================
-   LO QUE SIGUE ES NUEVO (header, mega menú, vistas, footer).
-   Ni una sola línea de arriba fue tocada, y no se define ningún color
-   nuevo — todo usa las variables que ya existen (--gold, --bone,
-   --deep, --ember, --ink).
-   ====================================================================== */
+/* de aquí para abajo: header, menú, vistas y footer */
 
 :root{
   --header-h: 84px;    /* JS la ajusta al alto real del header */
   --hairline: rgba(246,241,232,.18); /* mismo tono que ya usa .meta */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* curva propia, no el "ease" plano de CSS */
-  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1); /* con rebote, para cambios que se deben notar */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* curva propia */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1); /* con rebote, para que se note */
 }
 
 /* ---------- Header ---------- */
@@ -104,8 +137,9 @@
   justify-content: space-between;
   gap: 16px;
   padding: 10px clamp(20px, 5vw, 56px);
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(8px);
+  /* deja ver el video de fondo, ya no lo tapa */
+  background: rgba(0,0,0,.22);
+  backdrop-filter: blur(2px);
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -121,18 +155,12 @@
   width: auto;
   fill: var(--bone);
 }
-/* LOGO_2.svg trae su propio color grabado adentro (.st0 = #231f20,
-   pensado para fondo claro). Lo forzamos a --bone para que se vea
-   sobre el header oscuro, sin tocar el archivo SVG original. */
+/* el svg trae su propio color adentro, lo forzamos a bone */
 .brand-mark .st0{
   fill: var(--bone) !important;
 }
 
-/* Flechita "volver al inicio": position:absolute para que NO
-   empuje el logo hacia la derecha (ya no reserva espacio en el
-   flex del header). Centrada, para no pisar ni el logo (izquierda)
-   ni el menú (derecha), sin importar el ancho de ninguno de los
-   dos. Solo es visible fuera de Inicio. */
+/* flecha de volver: centrada, para no pisar el logo ni el menú */
 .back-home{
   position: absolute;
   left: 50%;
@@ -164,9 +192,11 @@
   .back-home-label{ display: none; }
 }
 
-/* ---------- Menú (escritorio) ---------- */
+/* ---------- Menú ---------- */
+/* solo se ve la palabra "Menú"; al pasar el mouse (o tocar) se abre
+   un panel con las 4 secciones en columnas, todo junto */
 .menu-toggle{
-  display: none;
+  display: flex;
   align-items: center;
   gap: 12px;
   background: none;
@@ -188,130 +218,95 @@
 .menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(2){ opacity: 0; }
 .menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
 
-.menu-panel ul{
-  list-style: none; display: flex; align-items: center; gap: 4px; margin: 0; padding: 0;
-}
-.menu-panel a{
-  display: flex; align-items: baseline; gap: 6px;
-  padding: 10px 14px; border-radius: 4px;
-  font: 500 .78rem/1 'Archivo', sans-serif;
-  letter-spacing: .06em; text-transform: uppercase;
-  color: var(--bone);
-  transition: background .15s var(--ease-out), color .15s var(--ease-out);
-}
-.menu-panel a[data-index]::before{
-  content: attr(data-index);
-  font-size: .68rem;
-  color: var(--gold);
-  opacity: .7;
-}
-.menu-panel a:hover{ background: rgba(246,241,232,.1); color: var(--gold); }
-
-/* ---------- Menú (móvil) ---------- */
-@media (max-width: 760px){
-  .menu-toggle{ display: flex; }
-  .menu-panel{
-    position: absolute; top: 100%; right: clamp(20px, 5vw, 56px); margin-top: 12px;
-    background: var(--deep); border-radius: 8px; overflow: hidden; min-width: 220px;
-    transform-origin: top right; opacity: 0; transform: scale(.96) translateY(-8px);
-    pointer-events: none; transition: opacity .22s var(--ease-out), transform .22s var(--ease-out);
-    box-shadow: 0 20px 40px rgba(0,0,0,.4);
-    border: 1px solid var(--hairline);
-  }
-  .menu-panel.open{ opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-  .menu-panel ul{ flex-direction: column; align-items: stretch; padding: 8px 0; }
-  .menu-panel a{
-    padding: 14px 24px; font-family: 'Fraunces', serif; font-weight: 600;
-    font-size: 1.25rem; text-transform: none; color: var(--bone); border-radius: 0;
-  }
-  .menu-panel a[data-index]::before{ font-size: .72rem; }
-  .menu-panel a:hover{ background: rgba(246,241,232,.08); padding-left: 30px; }
-}
-
-/* ---------- Mega menú ---------- */
-/* Ancho completo, 70% del alto (queda un 30% de la página visible
-   abajo). Solo uno puede estar .open — lo controla menu.js. */
-.mega-menu{
+/* ancho completo, debajo del header. Fondo semitransparente con
+   blur, igual que el header: se sigue viendo el video moverse. */
+.menu-panel{
   position: fixed;
   top: var(--header-h);
   left: 0;
   width: 100%;
-  height: 70vh;
   display: flex;
-  gap: clamp(24px, 5vw, 64px);
-  padding: clamp(32px, 5vw, 64px) clamp(20px, 5vw, 56px);
-  background: var(--deep);
+  flex-wrap: nowrap;
+  gap: clamp(20px, 3.5vw, 56px);
+  padding: clamp(28px, 5vw, 48px) clamp(20px, 5vw, 56px);
+  background: rgba(16,13,12,.55);
+  backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--hairline);
-  box-shadow: 0 40px 60px -20px rgba(0,0,0,.5);
+  box-shadow: 0 30px 50px -20px rgba(0,0,0,.4);
   z-index: 14;
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
-  transition: opacity .18s var(--ease-out), transform .18s var(--ease-out);
+  transition: opacity .2s var(--ease-out), transform .2s var(--ease-out);
+  /* si con todo y esto no cabe de ancho en una pantalla angosta,
+     mejor que deslice de lado a que salte a una segunda fila. */
+  overflow-x: auto;
+  /* con varias columnas y submenús largos, a veces no cabe
+     todo en el alto de la pantalla: mejor que deslice a que se
+     corte o se salga. */
+  max-height: calc(100vh - var(--header-h, 84px) - 24px);
   overflow-y: auto;
 }
-.mega-menu.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
+.menu-panel.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-.mega-col{ display: flex; flex-direction: column; gap: 14px; min-width: 200px; }
-.mega-col-title{
-  font: 500 .68rem/1 'Archivo', sans-serif;
-  letter-spacing: .18em; text-transform: uppercase;
-  color: var(--gold); opacity: .85; margin-bottom: 4px;
-}
-.mega-col a{
+.menu-col{ display: flex; flex-direction: column; gap: 10px; min-width: 170px; }
+.menu-col-title{
   font-family: 'Fraunces', serif; font-weight: 600;
-  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
-  color: var(--bone); transition: color .15s var(--ease-out);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  color: var(--bone);
+  margin-bottom: 4px;
+  transition: color .15s var(--ease-out);
 }
-.mega-col a:hover{ color: var(--gold); }
-
-.mega-feature{
-  flex: 1 1 auto; max-width: 420px; padding: 24px;
-  background: rgba(246,241,232,.05); border-radius: 8px;
+/* "Avivamiento Academy" no tiene sección propia todavía, así que
+   su título no es un link, solo la etiqueta de la columna. */
+.menu-col-title--plain{ cursor: default; }
+.menu-col-title--plain:hover{ color: var(--bone); }
+/* encabezado de un H2 (Ministerios, Eventos especiales, Ver,
+   Escuchar, Leer): agrupado bajo su H1 en el menú, pero es una
+   sección propia e independiente, sin relación con el resto de la
+   columna. */
+.menu-col-sub{
+  margin-top: 10px;
+  font: 700 .68rem/1 'Archivo', sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .8;
+  transition: opacity .15s var(--ease-out);
 }
-.mega-feature p{ color: #E9DCCC; line-height: 1.6; margin: 0; }
+.menu-col-sub:hover{ color: var(--gold); opacity: 1; }
+.menu-col a:not(.menu-col-title):not(.menu-col-sub){
+  font: 500 .85rem/1.4 'Archivo', sans-serif;
+  color: rgba(246,241,232,.7);
+  transition: color .15s var(--ease-out);
+}
+.menu-col a:hover{ color: var(--gold); }
 
 @media (max-width: 760px){
-  .mega-menu{ display: none; } /* depende de :hover, no aplica en móvil */
+  .menu-panel{
+    flex-direction: column;
+    gap: 24px;
+    max-height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+  }
 }
 
-/* El resto del sitio ya respeta esta preferencia (intro y hero). El
-   header, el menú y el mega menú son nuevos y no la tenían: aquí
-   cambiamos sus transiciones a instantáneas, sin quitar el cambio
-   de opacidad/color que ayuda a entender qué pasó. */
+/* motion reducido: transiciones casi instantáneas */
 @media (prefers-reduced-motion: reduce){
   .back-home,
   .menu-toggle-icon span,
   .menu-panel,
-  .mega-menu,
-  .menu-panel a,
-  .mega-col a{
+  .menu-col a{
     transition-duration: .01ms !important;
   }
 }
 
-/* ---------- "Ya no hay más": el menú crece ----------
-   site.js agrega body.hero-at-end cuando el usuario llega al final
-   del recorrido del hero (nada más para revelar, solo el video en
-   loop). El logo y el menú crecen bastante y en negrita, con un
-   pequeño rebote al final, para que sea imposible no notar que ya
-   no hay que seguir bajando, hay que buscar en el menú. Mismo
-   momento exacto que el texto de los horarios (ver .hero-schedule
-   más abajo) — misma señal, un solo instante. */
+/* al llegar al final del hero, el logo y "Menú" crecen para que se
+   note que ya no hay más y hay que usar el menú */
 body.hero-at-end .brand{
   transform: scale(1.35);
   transform-origin: left center;
   transition: transform .8s var(--ease-pop);
-}
-@media (min-width: 761px){
-  body.hero-at-end .menu-panel{
-    transform: scale(1.35);
-    transform-origin: right center;
-    transition: transform .8s var(--ease-pop);
-  }
-  body.hero-at-end .menu-panel a{
-    font-weight: 700;
-  }
 }
 body.hero-at-end .menu-toggle{
   transform: scale(1.35);
@@ -320,9 +315,7 @@ body.hero-at-end .menu-toggle{
 }
 
 /* ---------- Vistas ---------- */
-/* Cada sección vive en su propio .view; solo la .active se muestra.
-   "Navegar" es solo cambiar cuál .view está visible — misma pestaña,
-   sin recargar nada. */
+/* cada sección es un .view, solo se ve la que tiene .active */
 #page > main{ flex: 1; display: flex; flex-direction: column; }
 .view{ display: none; flex: 1; flex-direction: column; }
 .view.active{ display: flex; }
@@ -360,29 +353,17 @@ body.hero-at-end .menu-toggle{
   color: var(--gold);
 }
 
-/* ---------- Botón "Repetir intro" ----------
-   Lo ocultamos por CSS en vez de borrarlo del HTML: script.js
-   depende de que este botón exista (hace getElementById('replay') y
-   le pone un listener), así que quitarlo del HTML rompería la intro.
-   Esto lo deja invisible y no-clicable sin tocar ni una línea de la
-   intro. */
+/* el botón de repetir intro queda oculto pero sigue en el html, el
+   script de la intro lo necesita para funcionar */
 #replay{
   display: none !important;
 }
 
-/* ---------- Hero: foto → video, con versículo y horarios flotando ----------
-   .hero-reveal ocupa todo el alto disponible (es el único hijo de
-   .view#view-inicio, que ya es flex:1). Adentro se apilan cuatro
-   capas: la foto, el video (crossfade entre ambos con --reveal), el
-   versículo flotante (.hero-verse, sin fondo, entra y sale con
-   --reveal/--exit) y los horarios (.hero-schedule, aparecen al
-   final y se quedan). site.js controla --reveal y --exit con la
-   rueda del mouse o el dedo. */
+/* el hero: foto, luego video, con el versículo y los horarios
+   flotando encima, todo controlado por site.js con la rueda o el dedo */
 .hero-reveal{
-  height: 100vh;         /* fija a una pantalla completa: sin esto, si */
-  flex-shrink: 0;        /* algo se agrega después dentro de la misma */
-                         /* vista, flexbox lo achicaría en vez de */
-                         /* empujarlo hacia abajo. */
+  height: calc(100vh - var(--header-h, 84px)); /* una pantalla completa */
+  flex-shrink: 0;        /* restando el header, si no sobra un poco */
   position: relative;
   overflow: hidden;
   touch-action: none;
@@ -405,22 +386,12 @@ body.hero-at-end .menu-toggle{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* La imagen nueva tiene a las personas arriba y la multitud abajo
-     (al revés que la anterior). Con un valor bajo, el recorte (si
-     hace falta en pantallas anchas y bajas) siempre sale de la
-     multitud, nunca de las cabezas. */
+  /* si hay que recortar, que sea de la multitud, no de las cabezas */
   object-position: center 8%;
 }
 
-/* La foto de los pastores se desvanece a la vez que aparece el
-   video, pero con su PROPIO ritmo (--fade), más lento y espaciado
-   que el movimiento del versículo (--reveal): así el crossfade se
-   siente gradual y natural, no un corte rápido. El video queda
-   encima en el z-index para que la mezcla se vea limpia mientras
-   ambos tienen opacidad intermedia. site.js ya actualiza --reveal,
-   --exit y --fade suavizados cuadro a cuadro (sin transition CSS
-   aquí: tener las dos cosas a la vez sumaba un segundo suavizado
-   encima del de JS y se sentía menos preciso, no más suave). */
+/* la foto se desvanece más despacio que el versículo, para que el
+   cambio se sienta natural y no como un corte */
 .hero-video{
   position: absolute;
   inset: 0;
@@ -433,24 +404,15 @@ body.hero-at-end .menu-toggle{
   object-fit: cover;
 }
 
-/* ---------- Versículo: flota sobre el video, sin panel de fondo ----------
-   Entra desde abajo hasta el centro de la pantalla (--reveal 0→1) y
-   sigue subiendo hasta salir por arriba mientras se desvanece
-   (--exit 0→1). Sin gradiente detrás: la lectura se protege con
-   text-shadow en vez de una caja de color. */
+/* versículo flotando sobre el video, sin fondo, abajo del todo */
 .hero-verse{
   position: absolute;
   inset: 0;
   z-index: 3;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 0 clamp(24px, 6vw, 96px);
-  /* Al llenar todo el contenedor con inset:0, un translateY en % se
-     mueve relativo a su propia altura, que es la del contenedor
-     completo — así queda bien escondido arriba y abajo sin importar
-     el tamaño de pantalla (a diferencia de usar vh, que no calzaba
-     con el alto real de .hero-reveal). */
+  justify-content: flex-end;
+  padding: 0 clamp(24px, 6vw, 96px) clamp(64px, 10vw, 120px);
   transform: translateY(calc((1 - var(--reveal, 0)) * 130% - var(--exit, 0) * 130%));
   opacity: calc(1 - var(--exit, 0));
 }
@@ -464,11 +426,7 @@ body.hero-at-end .menu-toggle{
   font-size: 1.4rem;
 }
 
-/* ---------- Horarios: aparecen al final, abajo, y se quedan ----------
-   Se desvanecen hacia adentro a la vez que el versículo se va
-   (mismo --exit), y quedan como la información permanente sobre el
-   video en loop. Tampoco tienen panel de fondo, solo la línea
-   divisoria fina que ya existía en .meta. */
+/* horarios: aparecen al final y se quedan ahí */
 .hero-schedule{
   position: absolute;
   left: 0;
@@ -476,29 +434,33 @@ body.hero-at-end .menu-toggle{
   bottom: 0;
   z-index: 3;
   padding: clamp(28px, 6vw, 64px) clamp(24px, 6vw, 96px) clamp(32px, 7vw, 80px);
-  opacity: var(--exit, 0);
-  transform: translateY(calc((1 - var(--exit, 0)) * 16px));
+  /* mismo tipo de entrada que el versículo: sube desde abajo y
+     luego, cuando llegan los eventos, sigue subiendo y sale. */
+  opacity: calc(1 - var(--events, 0));
+  transform: translateY(calc((1 - var(--exit, 0)) * 100% - var(--events, 0) * 100%));
   pointer-events: none;
 }
 .hero-schedule .lede,
+.stop .lede,
 .hero-schedule .meta strong,
 .hero-schedule .meta span{
   text-shadow: 0 2px 16px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.85);
 }
 
-/* Tamaño de letra grande, a la altura del versículo, con transición
-   suave. El tamaño "normal" de abajo es el que se ve mientras el
-   usuario todavía puede seguir bajando; cuando site.js detecta que
-   ya se llegó al final (nada más para mostrar) agrega
-   body.hero-at-end, y AMBAS cosas crecen juntas: este texto y el
-   menú de arriba (ver .brand / .menu-panel / .menu-toggle más
-   abajo) — la misma señal, al mismo tiempo, de "esto es todo, usa
-   el menú". */
-.hero-schedule .lede{
-  font-size: clamp(1.15rem, 2vw, 1.4rem);
-  transition: font-size .6s var(--ease-out);
+/* misma tipografía del versículo grande, para que todo el sitio
+   tenga el mismo hilo gráfico:
+   Fraunces 300, clamp(2.6rem,7vw,5.4rem) para el texto blanco,
+   y en dorado cursiva 600 para la palabra resaltada */
+.hero-schedule .lede,
+.stop .lede{
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(2.6rem, 7vw, 5.4rem);
+  line-height: 1.1;
+  letter-spacing: -.02em;
 }
-.hero-schedule .lede em{
+.hero-schedule .lede em,
+.stop .lede em{
   font-style: italic;
   font-weight: 600;
   color: var(--gold);
@@ -507,38 +469,11 @@ body.hero-at-end .menu-toggle{
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   transition: font-size .6s var(--ease-out);
 }
-body.hero-at-end .hero-schedule .lede{
-  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
-}
 body.hero-at-end .hero-schedule .meta strong{
   font-size: clamp(1.6rem, 3vw, 2.3rem);
 }
 
-.hero-hint{
-  position: absolute;
-  left: 0; right: 0; bottom: 18px;
-  z-index: 4;
-  text-align: center;
-  font-size: .7rem;
-  letter-spacing: .24em;
-  text-transform: uppercase;
-  color: rgba(246,241,232,.6);
-  pointer-events: none;
-  opacity: calc(1 - var(--reveal, 0));
-}
-/* La respiración vive en un span aparte: una animación con
-   keyframes de opacidad pisa cualquier opacidad puesta en el mismo
-   elemento (pasaba antes: el hint nunca llegaba a apagarse del
-   todo). Así, el fade de salida multiplica a la respiración en vez
-   de competir con ella. */
-.hero-hint span{
-  display: inline-block;
-  animation: breathe 2.6s ease-in-out infinite;
-}
-
-/* ---------- Botón dorado (uso general) ----------
-   Texto oscuro encima del dorado porque el dorado es un color
-   claro, texto claro encima se leería mal. */
+/* botón dorado, texto oscuro porque el dorado es un color claro */
 .btn-gold{
   display: inline-flex;
   align-items: center;
@@ -557,42 +492,34 @@ body.hero-at-end .hero-schedule .meta strong{
 .btn-gold:hover{ background: #F7BE5F; }
 .btn-gold:active{ transform: scale(0.97); }
 
-/* ---------- Aviso de eventos, en Inicio ----------
-   Vive DESPUÉS de .hero-reveal, dentro de la misma vista Inicio. El
-   banner y el botón son solo un anuncio: el botón lleva a Reuniones
-   y de ahí salta directo a #eventos-section (ver site.js), donde
-   están el detalle y los eventos anteriores. */
-.upcoming-events{
-  padding: clamp(56px, 9vw, 96px) clamp(24px, 6vw, 96px);
+/* aviso de eventos: última capa del hero, sube desde abajo igual
+   que las demás. El botón lleva a los eventos de verdad, en
+   Reuniones. Como es la última, no le hace falta salir. */
+.hero-events{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  /* mismo degradado del fondo del sitio, de borde a borde, para que
+     se vea como un bloque propio y no transparente sobre el video */
+  background:
+    radial-gradient(120% 90% at 50% 8%, #7A1E08 0%, #3A1005 45%, #180705 100%);
+  transform: translateY(calc((1 - var(--events, 0)) * 100%));
 }
-.upcoming-events-inner{
+.hero-events-inner{
   max-width: 1100px;
   margin: 0 auto;
+  padding: clamp(28px, 6vw, 64px) clamp(24px, 6vw, 96px) clamp(32px, 7vw, 80px);
 }
-.upcoming-events-inner .eyebrow{ margin-bottom: 1.2rem; }
-.upcoming-events-inner .event-banner{ margin-bottom: 1.4rem; }
+.hero-events .eyebrow,
+.stop-inner .eyebrow{ margin-bottom: 1.2rem; }
+.hero-events .event-banner,
+.stop-inner .event-banner{ margin-bottom: 1.4rem; }
 
 @media (prefers-reduced-motion: reduce){
   .btn-gold{ transition-duration: .01ms !important; }
 }
-
-/* ---------- Eventos (dentro de la vista Reuniones) ----------
-   Ya no es una ventana emergente: es contenido normal de la vista
-   Reuniones, debajo de los horarios. .page-inner de esa vista usa
-   justify-content:center y flex:1 sin min-height, así que al
-   agregar esto después simplemente se acomoda a su tamaño natural
-   y toda la vista crece hacia abajo (a diferencia de .hero-reveal
-   en Inicio, que sí necesitaba una altura fija). */
-.events-section{
-  padding: 0 clamp(24px, 6vw, 96px) clamp(56px, 9vw, 96px);
-}
-.events-section-inner{
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  gap: clamp(40px, 6vw, 64px);
-}
-.events-block .eyebrow{ margin-bottom: 1.2rem; }
 
 .event-banner{
   border-radius: 8px;
@@ -605,11 +532,8 @@ body.hero-at-end .hero-schedule .meta strong{
   height: 100%;
   object-fit: cover;
 }
-/* Blanco y negro solo en el aviso de Inicio, donde el banner es de
-   fondo y no debe competir con el resto de la página. En la propia
-   página de eventos (dentro de Reuniones) se queda a color, tal
-   como se mandó. */
-.upcoming-events .event-banner img{
+/* blanco y negro solo en Inicio, en la página de eventos va a color */
+.hero-events .event-banner img{
   filter: grayscale(1);
 }
 .event-title{

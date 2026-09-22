@@ -1,18 +1,14 @@
-// ============================================================
-// site.js — TODO lo que no es la intro: header, mega menú,
-// navegación entre vistas, y el panel del versículo del hero.
-// Un solo archivo aparte de script.js (la intro), que no se toca.
-// ============================================================
+// site.js: todo lo que no es la intro (header, menú, navegación
+// entre vistas, y el hero con foto/video/versículo).
+// script.js (la intro) es un archivo separado, no se toca.
 
-
-// ---- Año del footer ----
+// año del footer
 (function initFooterYear() {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 })();
 
-// ---- Altura real del header, para que el mega menú sepa dónde
-//      empezar (se guarda en --header-h) ----
+// alto real del header, para que el mega menú sepa dónde empezar
 (function initHeaderHeight() {
   const header = document.querySelector('.topbar');
   if (!header) return;
@@ -26,25 +22,45 @@
   window.addEventListener('load', setHeaderVar);
 })();
 
-// ---- Menú móvil (hamburguesa) ----
+// menú: se abre con hover (mouse) o con un toque (touch)
 (function initMobileMenu() {
   const toggle = document.getElementById('menu-toggle');
   const panel = document.getElementById('menu-panel');
   if (!toggle || !panel) return;
+
+  // en touch, tocar el botón dispara un "hover" sintético que
+  // termina solo, disparando un mouseleave justo después y
+  // cerrando el panel de una. Por eso el hover solo se usa en
+  // dispositivos que de verdad tienen mouse.
+  const canHover = matchMedia('(hover: hover)').matches;
+
+  let closeTimer = null;
 
   function closeMenu() {
     panel.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
   }
   function openMenu() {
+    clearTimeout(closeTimer);
     panel.classList.add('open');
     toggle.setAttribute('aria-expanded', 'true');
+  }
+  function scheduleClose() {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeMenu, 150);
   }
 
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
     panel.classList.contains('open') ? closeMenu() : openMenu();
   });
+
+  if (canHover) {
+    toggle.addEventListener('mouseenter', openMenu);
+    toggle.addEventListener('mouseleave', scheduleClose);
+    panel.addEventListener('mouseenter', () => clearTimeout(closeTimer));
+    panel.addEventListener('mouseleave', scheduleClose);
+  }
 
   document.addEventListener('click', (e) => {
     if (!panel.contains(e.target) && !toggle.contains(e.target)) closeMenu();
@@ -57,66 +73,14 @@
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeMenu();
   });
+
+  window.__closeMegaMenus = closeMenu;
 })();
 
-// ---- Mega menú: se abre al pasar el mouse sobre un item con
-//      data-mega. Un pequeño retraso al salir evita que se cierre
-//      por accidente al mover el mouse en diagonal hacia el panel. ----
-(function initMegaMenu() {
-  const items = document.querySelectorAll('.menu-panel li.has-mega');
-  const panels = document.querySelectorAll('.mega-menu');
-  const CLOSE_DELAY_MS = 150;
-  let closeTimer = null;
-
-  function openPanel(key) {
-    clearTimeout(closeTimer);
-    panels.forEach((panel) => {
-      panel.classList.toggle('open', panel.dataset.megaPanel === key);
-    });
-  }
-
-  function closeAllPanels() {
-    panels.forEach((panel) => panel.classList.remove('open'));
-  }
-
-  function scheduleClose() {
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(closeAllPanels, CLOSE_DELAY_MS);
-  }
-
-  items.forEach((li) => {
-    const key = li.dataset.mega;
-    li.addEventListener('mouseenter', () => openPanel(key));
-    li.addEventListener('mouseleave', scheduleClose);
-    // Un usuario de teclado no dispara mouseenter: al tabular hasta el
-    // link del ítem, abrimos el mismo panel que abriría el mouse.
-    li.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('focus', () => openPanel(key));
-      link.addEventListener('blur', scheduleClose);
-    });
-  });
-
-  panels.forEach((panel) => {
-    panel.addEventListener('mouseenter', () => clearTimeout(closeTimer));
-    panel.addEventListener('mouseleave', scheduleClose);
-    // Si el foco entra a un link DENTRO del panel (el usuario sigue
-    // tabulando hacia adelante), lo mantenemos abierto.
-    panel.addEventListener('focusin', () => clearTimeout(closeTimer));
-    // Si el foco sale del panel y no entra a otro elemento con mega
-    // menú, lo cerramos igual que con el mouse.
-    panel.addEventListener('focusout', scheduleClose);
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAllPanels();
-  });
-
-  window.__closeMegaMenus = closeAllPanels;
-})();
-
-// ---- Navegación entre vistas: cada sección vive en un .view y solo
-//      la que tiene .active se muestra. Clic en el menú = misma
-//      pestaña, sin recargar nada. ----
+// navegación: cada sección es un .view, solo se muestra la .active.
+// Algunas vistas además tienen "paradas" adentro (ver
+// initStopSections más abajo): si el link que se clickeó trae
+// data-stop, saltamos directo a esa parada en vez de a la primera.
 (function initViewNav() {
   const views = document.querySelectorAll('.view');
   const backBtn = document.getElementById('back-home');
@@ -124,7 +88,7 @@
 
   const validIds = Array.from(views).map((v) => v.dataset.viewId);
 
-  function switchView(id) {
+  function switchView(id, stopIndex) {
     if (!validIds.includes(id)) id = 'inicio';
 
     views.forEach((view) => {
@@ -138,21 +102,20 @@
     window.scrollTo({ top: 0, behavior: 'auto' });
     history.replaceState(null, '', '#' + id);
 
+    // si esta vista tiene paradas y nos dijeron a cuál ir, saltamos
+    // ahí directo (si no, se queda en la primera, que es donde ya
+    // estaba por defecto)
+    const controller = window.__stopSections && window.__stopSections[id];
+    if (controller && typeof stopIndex === 'number') controller.goTo(stopIndex);
+
     document.dispatchEvent(new CustomEvent('site:viewchange', { detail: { id } }));
   }
 
   document.querySelectorAll('[data-view]').forEach((el) => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
-      switchView(el.dataset.view);
-      // Algunos accesos (como el aviso de eventos en Inicio) no solo
-      // cambian de vista, también apuntan a una sección puntual
-      // dentro de ella (ej. el detalle de eventos en Reuniones).
-      const scrollTargetId = el.dataset.scrollTo;
-      if (scrollTargetId) {
-        const target = document.getElementById(scrollTargetId);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      const stopIndex = el.dataset.stop !== undefined ? Number(el.dataset.stop) : undefined;
+      switchView(el.dataset.view, stopIndex);
     });
   });
 
@@ -165,64 +128,168 @@
   switchView((location.hash || '#inicio').slice(1));
 })();
 
+// paradas: el mismo recorrido de foto→video→versículo del hero,
+// pero genérico, para cualquier sección con varias "pantallas"
+// seguidas (.stop) dentro de un .stops. Sirve para las 9 secciones
+// nuevas del menú (Conócenos, Ministerios, Visítanos, etc.) — cada
+// una arma su propio recorrido con este mismo motor, sin repetir
+// el código. Misma idea que el hero: "target" es a dónde vamos,
+// "shown" lo persigue suave, y hay una pausa breve (en los dos
+// sentidos) en cada parada para que cada una tenga su momento
+// quieto antes de seguir.
+(function initStopSections() {
+  const sections = document.querySelectorAll('.stops');
+  if (!sections.length) return;
 
-// ============================================================
+  window.__stopSections = window.__stopSections || {};
+
+  const WHEEL_TO_STEP = 640;
+  const TOUCH_TO_STEP = 190;
+  const FOLLOW = 0.16;
+  const PAUSE_MS = 550;
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+  sections.forEach((container) => {
+    const stops = Array.from(container.querySelectorAll(':scope > .stop'));
+    const view = container.closest('.view');
+    if (!stops.length || !view) return;
+    const viewId = view.dataset.viewId;
+
+    let target = 0;
+    let shown = 0;
+    let rafId = null;
+    let lastTouchY = null;
+    let pausedAt = null;
+    let pauseSince = null;
+    const MAX = stops.length - 1;
+
+    function paint() {
+      const diff = target - shown;
+      shown = Math.abs(diff) < 0.001 ? target : shown + diff * FOLLOW;
+      stops.forEach((el, i) => {
+        el.style.transform = `translateY(${(i - shown) * 100}%)`;
+      });
+      if (shown !== target) {
+        rafId = requestAnimationFrame(paint);
+      } else {
+        rafId = null;
+      }
+    }
+
+    function addDelta(fraction) {
+      const before = target;
+
+      if (pausedAt !== null && Math.abs(before - pausedAt) < 0.0005) {
+        if (performance.now() - pauseSince < PAUSE_MS) return;
+        pausedAt = null;
+      }
+
+      let next = clamp(before + fraction, 0, MAX);
+      if (fraction > 0) {
+        const hit = Math.ceil(before + 0.0005);
+        if (hit <= next && hit > before) {
+          next = hit;
+          pausedAt = hit;
+          pauseSince = performance.now();
+        }
+      } else if (fraction < 0) {
+        const hit = Math.floor(before - 0.0005);
+        if (hit >= next && hit < before) {
+          next = hit;
+          pausedAt = hit;
+          pauseSince = performance.now();
+        }
+      }
+
+      target = next;
+      if (target !== before && rafId === null) {
+        rafId = requestAnimationFrame(paint);
+      }
+    }
+
+    container.addEventListener('wheel', (e) => {
+      const goingDown = e.deltaY > 0;
+      const shouldCapture = (goingDown && target < MAX) || (!goingDown && target > 0);
+      if (shouldCapture) {
+        e.preventDefault();
+        addDelta(e.deltaY / WHEEL_TO_STEP);
+      }
+    }, { passive: false });
+
+    container.addEventListener('touchstart', (e) => {
+      lastTouchY = e.touches[0].clientY;
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      if (lastTouchY === null) return;
+      const y = e.touches[0].clientY;
+      const delta = lastTouchY - y;
+      const goingDown = delta > 0;
+      const shouldCapture = (goingDown && target < MAX) || (!goingDown && target > 0);
+      if (shouldCapture) {
+        e.preventDefault();
+        addDelta(delta / TOUCH_TO_STEP);
+      }
+      lastTouchY = y;
+    }, { passive: false });
+
+    container.addEventListener('touchend', () => { lastTouchY = null; });
+
+    paint();
+
+    window.__stopSections[viewId] = {
+      goTo(index) {
+        target = clamp(index, 0, MAX);
+        shown = target;
+        pausedAt = null;
+        paint();
+      }
+    };
+  });
+})();
+
+// el hero: foto → video → versículo → horarios → eventos, todo con
+// la misma rueda/dedo, nunca con el scroll normal de la página.
+// Cuatro tramos seguidos, nunca al mismo tiempo:
+//   1. fade:   se difumina la foto y aparece el video
+//   2. reveal: sube el versículo
+//   3. exit:   el versículo sale y suben los horarios
+//   4. events: los horarios salen y sube el aviso de eventos
+// "target" es a dónde vamos (lo mueve la rueda al instante).
+// "shown" es lo que se pinta, y persigue a "target" cuadro a
+// cuadro para que el movimiento sea fluido y no a saltos.
 (function initHeroReveal() {
   const heroReveal = document.getElementById('hero-reveal');
   const video = document.querySelector('.hero-video video');
   if (!heroReveal) return;
 
-  // Todo el recorrido tiene TRES tramos, uno detrás del otro (nunca
-  // superpuestos):
-  //   1. "fade":   la foto de los pastores se difumina y aparece el
-  //      video de fondo. El versículo todavía no se ve.
-  //   2. "reveal": recién ahí el panel del versículo sube desde
-  //      abajo hasta su lugar (centro de pantalla).
-  //   3. "exit":   el panel sigue subiendo, se desvanece, y solo
-  //      queda el video de fondo (en loop para siempre, eso lo hace
-  //      el atributo loop del <video>, no este script). Al llegar
-  //      al final de este tramo se agranda el menú (más abajo).
-  // "target" es a dónde queremos llegar (lo mueve la rueda/el dedo,
-  // de forma instantánea). "shown" es lo que realmente se pinta en
-  // pantalla, y persigue a "target" un poco cada frame en vez de
-  // saltar directo a él — así el movimiento queda fluido incluso
-  // cuando la rueda entrega el scroll en saltos grandes y poco
-  // frecuentes (el "cortado" que se sentía antes).
-  const MAX_PROGRESS = 2;
-  const WHEEL_TO_END = 640;  // cuánto scroll hace falta (antes 900, se sentía lento)
-  const TOUCH_TO_END = 190;  // px de dedo necesarios (antes 260)
+  const PHASE = 2 / 3;             // cuánto dura cada tramo
+  const MAX_PROGRESS = PHASE * 4;  // los cuatro tramos, uno detrás del otro
+  const WHEEL_TO_END = 640;  // cuánto scroll hace falta
+  const TOUCH_TO_END = 190;  // px de dedo necesarios
   const FOLLOW = 0.16;       // qué tanto se acerca "shown" a "target" cada frame
-  // Los tres tramos ya NO se superponen: primero termina el
-  // difuminado de la foto (0 → PHASE), y solo después empieza a
-  // aparecer el versículo (PHASE → 2·PHASE), y solo después empieza
-  // la salida (2·PHASE → MAX_PROGRESS), donde también crece el menú
-  // al llegar al final. Uno espera a que el anterior termine.
-  const PHASE = MAX_PROGRESS / 3;
-  // A partir de qué tan cerca del final (MAX_PROGRESS) se considera
-  // "ya no hay nada más" y se agrega body.hero-at-end.
-  const AT_END_THRESHOLD = MAX_PROGRESS - 0.02;
+  const AT_END_THRESHOLD = MAX_PROGRESS - 0.02; // desde aquí ya es "el final"
 
   let target = 0;
   let shown = 0;
   let rafId = null;
   let lastTouchY = null;
-  // Momento (performance.now()) en que target llegó al final por
-  // última vez. Mientras esté dentro de PAUSE_MS de ese instante,
-  // seguimos "atrapando" el scroll hacia abajo aunque target ya no
-  // pueda subir más: eso da la sensación de pausa justo cuando
-  // aparecen los horarios completos, antes de soltar la página
-  // hacia la sección de eventos. Al subir no hay pausa, sube directo.
-  let reachedEndAt = null;
+
+  // una pausa breve en cada parada del camino (fin del versículo,
+  // fin de los horarios), en los dos sentidos: cada sección tiene
+  // su propio momento quieto antes de seguir, tanto al bajar como
+  // al subir. Nunca se suelta el scroll hacia la página: acá ya no
+  // hay nada más abajo, todo (foto, video, versículo, horarios y
+  // eventos) vive dentro de este mismo recorrido.
+  const MID_CHECKPOINTS = [PHASE * 2, PHASE * 3];
+  let pausedAt = null;
+  let pauseSince = null;
   const PAUSE_MS = 550;
 
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
-  // "Ya no hay nada más" = se llegó al final del recorrido Y la
-  // vista activa es Inicio (si el usuario cambia de vista con el
-  // menú, no tiene sentido que el menú se quede grande en Reuniones
-  // o Contacto). site:viewchange (disparado por initViewNav) llama
-  // esto también, para que el cambio de vista lo actualice al toque
-  // aunque no haya scroll de por medio.
+  // "ya no hay nada más" solo cuenta en Inicio, si el usuario ya
+  // cambió de vista no tiene sentido que el menú se quede grande
   function updateAtEnd() {
     const activeView = document.querySelector('.view.active');
     const isInicio = activeView && activeView.dataset.viewId === 'inicio';
@@ -242,9 +309,11 @@
     const fade = clamp(shown / PHASE, 0, 1);
     const reveal = clamp((shown - PHASE) / PHASE, 0, 1);
     const exit = clamp((shown - PHASE * 2) / PHASE, 0, 1);
+    const events = clamp((shown - PHASE * 3) / PHASE, 0, 1);
     heroReveal.style.setProperty('--reveal', String(reveal));
     heroReveal.style.setProperty('--exit', String(exit));
     heroReveal.style.setProperty('--fade', String(fade));
+    heroReveal.style.setProperty('--events', String(events));
     updateAtEnd();
 
     if (shown !== target) {
@@ -256,34 +325,44 @@
 
   function addDelta(fraction) {
     const before = target;
-    target = clamp(target + fraction, 0, MAX_PROGRESS);
-    if (target >= MAX_PROGRESS && before < MAX_PROGRESS) {
-      reachedEndAt = performance.now();
-    } else if (target < MAX_PROGRESS) {
-      reachedEndAt = null;
+
+    // seguimos sentados en una pausa? no importa para qué lado se
+    // quiera mover, no avanza hasta que se cumpla el tiempo.
+    if (pausedAt !== null && Math.abs(before - pausedAt) < 0.0005) {
+      if (performance.now() - pauseSince < PAUSE_MS) return;
+      pausedAt = null;
     }
+
+    let next = clamp(before + fraction, 0, MAX_PROGRESS);
+
+    if (fraction > 0) {
+      const hit = MID_CHECKPOINTS.find((c) => before < c - 0.0005 && next >= c - 0.0005);
+      if (hit !== undefined) {
+        next = hit; // se clava justo ahí y arranca la pausa
+        pausedAt = hit;
+        pauseSince = performance.now();
+      }
+    } else if (fraction < 0) {
+      const hit = MID_CHECKPOINTS.find((c) => before > c + 0.0005 && next <= c + 0.0005);
+      if (hit !== undefined) {
+        next = hit; // misma pausa, ahora subiendo
+        pausedAt = hit;
+        pauseSince = performance.now();
+      }
+    }
+
+    target = next;
     if (target !== before && rafId === null) {
       rafId = requestAnimationFrame(render);
     }
   }
 
-  // Mientras el recorrido no ha terminado (target < 2) y el usuario
-  // baja el mouse, capturamos el scroll (no se mueve la página, sube
-  // o sale el panel). Si ya terminó, soltamos el scroll, PERO si
-  // acabamos de llegar al final hace menos de PAUSE_MS, lo seguimos
-  // capturando (sin mover nada) para que se sienta la pausa antes de
-  // soltar hacia la página. Al subir no hay pausa: "target > 0" ya
-  // deja reaccionar de una.
-  function withinPause() {
-    return reachedEndAt !== null && (performance.now() - reachedEndAt) < PAUSE_MS;
-  }
-
   heroReveal.addEventListener('wheel', (e) => {
     const goingDown = e.deltaY > 0;
-    const shouldCapture = (goingDown && (target < MAX_PROGRESS || withinPause())) || (!goingDown && target > 0);
+    const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
     if (shouldCapture) {
       e.preventDefault();
-      if (target < MAX_PROGRESS || !goingDown) addDelta(e.deltaY / WHEEL_TO_END);
+      addDelta(e.deltaY / WHEEL_TO_END);
     }
   }, { passive: false });
 
@@ -294,35 +373,29 @@
   heroReveal.addEventListener('touchmove', (e) => {
     if (lastTouchY === null) return;
     const y = e.touches[0].clientY;
-    const delta = lastTouchY - y; // positivo = dedo sube = "baja" el contenido
+    const delta = lastTouchY - y; // dedo sube = "baja" el contenido
     const goingDown = delta > 0;
-    const shouldCapture = (goingDown && (target < MAX_PROGRESS || withinPause())) || (!goingDown && target > 0);
+    const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
     if (shouldCapture) {
       e.preventDefault();
-      if (target < MAX_PROGRESS || !goingDown) addDelta(delta / TOUCH_TO_END);
+      addDelta(delta / TOUCH_TO_END);
     }
     lastTouchY = y;
   }, { passive: false });
 
   heroReveal.addEventListener('touchend', () => { lastTouchY = null; });
 
-  render(); // estado inicial siempre, pase lo que pase con matchMedia
+  render(); // estado inicial, pase lo que pase con matchMedia
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    // Igual que antes: salta directo al versículo ya visible (foto
-    // ya difuminada), sin la animación de entrada. La salida
-    // (target > 2·PHASE) sigue disponible si el usuario sigue bajando.
+    // salta directo al versículo ya visible, sin animación de entrada
     target = PHASE * 2;
     shown = PHASE * 2;
     render();
   }
 
-  // ---- Autoplay del video de fondo ----
-  // El navegador debería reproducirlo solo (está muteado), pero por
-  // si algún navegador lo bloquea antes de cualquier gesto, lo
-  // reintentamos apenas el usuario mueve la rueda o el dedo por
-  // primera vez. loop y muted ya están en el HTML, así que esto solo
-  // arranca la reproducción, nunca la reinicia.
+  // por si el navegador bloquea el autoplay del video, reintentamos
+  // apenas el usuario mueve la rueda o el dedo por primera vez
   if (video) {
     const tryPlay = () => { video.play().catch(() => {}); };
     tryPlay();

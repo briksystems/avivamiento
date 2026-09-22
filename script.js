@@ -1,29 +1,29 @@
 (function () {
   'use strict';
 
-  // ---- Medidas del SVG original (viewBox="0 0 1569.12 837.21") ----
+  // medidas del svg original del logo
   const LOGO_W = 1569.12, LOGO_H = 837.21;
   const LOGO_CX = LOGO_W / 2, LOGO_CY = LOGO_H / 2;
-  const MARK_CX = 786,  MARK_CY = 232;   // centro del emblema (la llama)
+  const MARK_CX = 786,  MARK_CY = 232;   // centro de la llama
 
-  // ---- Perillas del efecto ----
+  // las perillas del efecto
   const BASE_WIDTH   = () => Math.min(innerWidth * 0.62, 620); // logo al inicio
-  const ZOOM_END     = 90;    // cuántas veces crece el logo al final
-  const WHEEL_TO_END = 1150; // cuánto scroll hace falta (antes 1700, muy lento)
-  const TOUCH_TO_END = 330;  // px de dedo necesarios (antes 480, muy lento)
-  const RECENTER_AT  = 0.35;  // en qué punto el zoom ya apunta al emblema
-  const REVEAL_START = 0.25;  // aquí el CÍRCULO empieza a volverse ventana
-  const REVEAL_END   = 0.48;  // aquí el círculo ya es hueco puro
-  const TEXT_FADE_END = 0.18; // el texto ya se fue por completo antes de esto
-  const FADE_FROM    = 0.80;  // desde dónde el velo empieza a desaparecer
+  const ZOOM_END     = 90;    // cuánto crece el logo al final
+  const WHEEL_TO_END = 1150;  // cuánto scroll hace falta
+  const TOUCH_TO_END = 330;   // px de dedo necesarios
+  const RECENTER_AT  = 0.35;  // aquí el zoom ya apunta a la llama
+  const REVEAL_START = 0.25;  // aquí el círculo empieza a abrirse
+  const REVEAL_END   = 0.48;  // aquí ya es un hueco puro
+  const TEXT_FADE_END = 0.18; // el texto ya se fue antes de esto
+  const FADE_FROM    = 0.80;  // desde aquí el velo empieza a irse
   const SNAP_AT      = 0.88;  // si sueltas aquí, se completa solo
   const IDLE_MS      = 170;
 
   const veil   = document.getElementById('veil');
-  const holeUse   = document.getElementById('hole-use');    // círculo, dentro de la máscara
-  const solidUse  = document.getElementById('solid-use');   // círculo, visible y sólido
+  const holeUse   = document.getElementById('hole-use');    // el hueco de la máscara
+  const solidUse  = document.getElementById('solid-use');   // el círculo sólido
   const textUse   = document.getElementById('text-use');    // "Avivamiento"
-  const textUse2  = document.getElementById('text-use-2');  // eslogan
+  const textUse2  = document.getElementById('text-use-2');  // el eslogan
   const hint   = document.getElementById('hint');
   const replay = document.getElementById('replay');
 
@@ -32,17 +32,15 @@
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
   const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-  // ---- Traduce `progress` a la transformación del hueco ----
+  // traduce el progreso a la transformación del hueco
   function applyProgress() {
     const vw = innerWidth, vh = innerHeight;
 
-    // Escala geométrica: se siente como avanzar a velocidad constante,
-    // no como estirar un número lineal.
+    // escala geométrica, para que se sienta a velocidad constante
     const base  = BASE_WIDTH() / LOGO_W;
     const scale = base * Math.pow(ZOOM_END, progress);
 
-    // El punto que se queda clavado en el centro de la pantalla:
-    // arranca en el centro del logo completo y migra al centro del emblema.
+    // el punto fijo en el centro va migrando del logo a la llama
     const k  = easeOut(clamp(progress / RECENTER_AT, 0, 1));
     const ax = LOGO_CX + (MARK_CX - LOGO_CX) * k;
     const ay = LOGO_CY + (MARK_CY - LOGO_CY) * k;
@@ -53,19 +51,19 @@
     textUse.setAttribute('transform', t);
     textUse2.setAttribute('transform', t);
 
-    // El texto (wordmark + eslogan) solo se desvanece. NUNCA es ventana.
+    // el texto solo se desvanece, nunca es ventana
     const textFade = clamp(progress / TEXT_FADE_END, 0, 1);
     const textOpacity = String(1 - textFade);
     textUse.style.opacity = textOpacity;
     textUse2.style.opacity = textOpacity;
 
-    // Apertura: el CÍRCULO sólido se desvanece mientras el hueco se abre.
+    // el círculo sólido se desvanece mientras el hueco se abre
     const open = clamp((progress - REVEAL_START) / (REVEAL_END - REVEAL_START), 0, 1);
     const grey = Math.round(255 * (1 - open));      // 255 = sin hueco, 0 = hueco total
     holeUse.setAttribute('fill', `rgb(${grey},${grey},${grey})`);
     solidUse.style.opacity = String(1 - open);
 
-    // Al final el velo se disuelve, para que nunca queden bordes raros.
+    // al final el velo se disuelve, sin bordes raros
     const fade = clamp((progress - FADE_FROM) / (1 - FADE_FROM), 0, 1);
     veil.style.opacity = String(1 - fade);
     hint.style.opacity = progress > 0.04 ? '0' : '';
@@ -126,7 +124,7 @@
   }, { passive: false });
   veil.addEventListener('touchend', () => { lastY = null; });
 
-  // Accesibilidad mínima: teclado y usuarios que piden menos movimiento.
+  // teclado y usuarios que piden menos movimiento
   addEventListener('keydown', e => {
     if (finished) return;
     if (e.key === 'Escape') { progress = 1; applyProgress(); finish(); }
