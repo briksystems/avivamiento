@@ -279,87 +279,95 @@
 }
 .menu-panel.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-.menu-col{ display: flex; flex-direction: column; gap: 10px; min-width: 170px; }
-.menu-group{ display: flex; flex-direction: column; }
-.menu-group-head{
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-}
-/* el botón "+" para desplegar solo existe visualmente en mobile
-   (ver media query más abajo); en web el grupo ya está abierto
-   siempre y este botón ni se muestra. */
-.menu-group-toggle{
-  display: none;
-  flex: none;
-  width: 28px; height: 28px;
-  align-items: center; justify-content: center;
-  background: none; border: 1px solid rgba(246,241,232,.3); border-radius: 999px;
-  cursor: pointer;
-}
-.menu-group-toggle span{
-  position: relative; display: block; width: 10px; height: 10px;
-}
-.menu-group-toggle span::before,
-.menu-group-toggle span::after{
-  content: ""; position: absolute; background: var(--bone);
-  transition: transform .2s var(--ease-out);
-}
-.menu-group-toggle span::before{ left: 0; top: 50%; width: 100%; height: 1.5px; transform: translateY(-50%); }
-.menu-group-toggle span::after{ top: 0; left: 50%; width: 1.5px; height: 100%; transform: translateX(-50%); }
-.menu-group.open .menu-group-toggle span::after{ transform: translateX(-50%) scaleY(0); }
+.menu-col{ display: flex; flex-direction: column; min-width: 200px; }
 
-.menu-group-links{ display: flex; flex-direction: column; gap: 10px; }
-.menu-col-title{
+/* el disparador es el título completo de la sección: ocupa todo el
+   ancho de la columna para que el área de toque sea grande, con el
+   ícono "+" a la derecha que gira a "×" al abrir. */
+.menu-group-trigger{
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%;
+  background: none; border: none; cursor: pointer;
+  padding: 10px 0;
+  text-align: left;
+}
+.menu-group-trigger-label{
   font-family: 'Fraunces', serif; font-weight: 600;
   font-size: clamp(1.2rem, 1.8vw, 1.5rem);
   color: var(--bone);
-  margin-bottom: 4px;
   transition: color .15s var(--ease-out);
 }
-/* "Avivamiento Academy" no tiene sección propia todavía, así que
-   su título no es un link, solo la etiqueta de la columna. */
-.menu-col-title--plain{ cursor: default; }
-.menu-col-title--plain:hover{ color: var(--bone); }
-/* encabezado de un H2 (Ministerios, Eventos especiales, Ver,
-   Escuchar, Leer): agrupado bajo su H1 en el menú, pero es una
-   sección propia e independiente, sin relación con el resto de la
-   columna. */
-.menu-col-sub{
-  margin-top: 10px;
+.menu-group-trigger:hover .menu-group-trigger-label{ color: var(--gold); }
+
+.menu-group-icon{
+  flex: none; position: relative;
+  width: 28px; height: 28px;
+  border: 1px solid rgba(246,241,232,.3); border-radius: 999px;
+  transition: border-color .15s var(--ease-out), transform .3s var(--ease-out);
+}
+.menu-group-trigger:hover .menu-group-icon{ border-color: var(--gold); }
+.menu-group-icon::before,
+.menu-group-icon::after{
+  content: ""; position: absolute; background: var(--bone);
+  transition: transform .3s var(--ease-out), background .15s var(--ease-out);
+}
+.menu-group-icon::before{ left: 6px; top: 50%; width: 14px; height: 1.5px; transform: translateY(-50%); }
+.menu-group-icon::after{ top: 6px; left: 50%; width: 1.5px; height: 14px; transform: translateX(-50%); }
+.menu-group-trigger:hover .menu-group-icon::before,
+.menu-group-trigger:hover .menu-group-icon::after{ background: var(--gold); }
+.menu-group[data-open="true"] .menu-group-icon{ transform: rotate(90deg); }
+.menu-group[data-open="true"] .menu-group-icon::after{ transform: translateX(-50%) scaleY(0); }
+
+/* alto real animado (no un max-height inventado): el panel es una
+   grilla de una sola fila que crece de 0fr a 1fr, así el contenido
+   nunca queda cortado ni sobra espacio de más. */
+.menu-group-panel{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .35s var(--ease-out);
+}
+.menu-group-panel-inner{ overflow: hidden; }
+.menu-group[data-open="true"] .menu-group-panel{ grid-template-rows: 1fr; }
+
+.menu-links{ display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
+.menu-links a{
+  font: 500 .85rem/1.4 'Archivo', sans-serif;
+  color: rgba(246,241,232,.75);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: color .15s var(--ease-out);
+  width: fit-content;
+}
+.menu-links a:hover,
+.menu-links a:focus-visible{ color: var(--gold); text-decoration: underline; }
+
+/* sub-sección (Ministerios, Eventos especiales, Ver, Escuchar,
+   Leer): agrupada bajo su H1 en el menú, pero es su propia sección
+   independiente — el título dorado ya lleva directo a ella. */
+.menu-subgroup{ padding-bottom: 6px; }
+.menu-subgroup-title{
+  display: block;
   font: 700 .68rem/1 'Archivo', sans-serif;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: .8;
+  text-decoration: none;
+  text-underline-offset: 3px;
+  opacity: .85;
+  margin-bottom: 10px;
+  width: fit-content;
   transition: opacity .15s var(--ease-out);
 }
-.menu-col-sub:hover{ color: var(--gold); opacity: 1; }
-.menu-col a:not(.menu-col-title):not(.menu-col-sub){
-  font: 500 .85rem/1.4 'Archivo', sans-serif;
-  color: rgba(246,241,232,.7);
-  transition: color .15s var(--ease-out);
-}
-.menu-col a:hover{ color: var(--gold); }
+.menu-subgroup-title:hover,
+.menu-subgroup-title:focus-visible{ opacity: 1; text-decoration: underline; }
+.menu-subgroup .menu-links{ padding-top: 0; }
 
 @media (max-width: 760px){
   .menu-panel{
     flex-direction: column;
-    gap: 24px;
+    gap: 4px;
     max-height: calc(100vh - var(--header-h));
     overflow-y: auto;
-  }
-  /* en mobile la lista completa es demasiado larga: cada grupo
-     empieza cerrado (solo título) y se abre al tocar el "+". El
-     título en sí sigue siendo un link normal, así que tocarlo
-     todavía lleva directo a esa sección. */
-  .menu-group-toggle{ display: flex; }
-  .menu-group-links{
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height .3s var(--ease-out);
-  }
-  .menu-group.open .menu-group-links{
-    max-height: 480px; /* de sobra para el grupo más largo (Escuchar) */
-    margin-top: 10px;
   }
   /* en pantallas angostas "cover" recortaba al hombre por el borde
      izquierdo; corrido así se ve completo, y todavía se alcanza a

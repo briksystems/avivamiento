@@ -77,18 +77,20 @@
   window.__closeMegaMenus = closeMenu;
 })();
 
-// en mobile cada grupo del menú (título + sus links) se abre o
-// cierra aparte, para no mostrar la lista completa de una. El
-// botón "+" es aparte del link del título, así que tocar el título
-// sigue llevando directo a esa sección.
+// cada una de las 5 secciones grandes del menú empieza cerrada,
+// mostrando solo el título; tocarlo despliega todo lo suyo de una
+// vez (sus links propios y, si tiene, sus sub-secciones doradas
+// con los suyos). Ninguna de las dos está atada a la otra, así que
+// se pueden tener varias abiertas al mismo tiempo.
 (function initMenuGroups() {
-  document.querySelectorAll('.menu-group-toggle').forEach((btn) => {
+  document.querySelectorAll('.menu-group-trigger').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const group = btn.closest('.menu-group');
-      const open = group.classList.toggle('open');
-      btn.setAttribute('aria-expanded', String(open));
+      const open = group.dataset.open === 'true';
+      group.dataset.open = String(!open);
+      btn.setAttribute('aria-expanded', String(!open));
     });
   });
 })();
