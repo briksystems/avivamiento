@@ -77,6 +77,22 @@
   window.__closeMegaMenus = closeMenu;
 })();
 
+// en mobile cada grupo del menú (título + sus links) se abre o
+// cierra aparte, para no mostrar la lista completa de una. El
+// botón "+" es aparte del link del título, así que tocar el título
+// sigue llevando directo a esa sección.
+(function initMenuGroups() {
+  document.querySelectorAll('.menu-group-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const group = btn.closest('.menu-group');
+      const open = group.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  });
+})();
+
 // navegación: cada sección es un .view, solo se muestra la .active.
 // Algunas vistas además tienen "paradas" adentro (ver
 // initStopSections más abajo): si el link que se clickeó trae
@@ -163,12 +179,35 @@
     let pauseSince = null;
     const MAX = stops.length - 1;
 
+    // las dos flechas, chiquitas, para quien no se dé cuenta de que
+    // se puede seguir bajando (o subiendo). Se crean por JS para no
+    // repetir el mismo HTML en las 9 secciones.
+    const navUp = document.createElement('button');
+    navUp.type = 'button';
+    navUp.className = 'stop-nav stop-nav--up';
+    navUp.setAttribute('aria-label', 'Anterior');
+    navUp.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>';
+    const navDown = document.createElement('button');
+    navDown.type = 'button';
+    navDown.className = 'stop-nav stop-nav--down';
+    navDown.setAttribute('aria-label', 'Siguiente');
+    navDown.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 19l7-7h-4V5h-6v7H5z" fill="currentColor"/></svg>';
+    container.appendChild(navUp);
+    container.appendChild(navDown);
+
+    function updateNav() {
+      const i = Math.round(shown);
+      navUp.hidden = i <= 0;
+      navDown.hidden = i >= MAX;
+    }
+
     function paint() {
       const diff = target - shown;
       shown = Math.abs(diff) < 0.001 ? target : shown + diff * FOLLOW;
       stops.forEach((el, i) => {
         el.style.transform = `translateY(${(i - shown) * 100}%)`;
       });
+      updateNav();
       if (shown !== target) {
         rafId = requestAnimationFrame(paint);
       } else {
@@ -206,6 +245,9 @@
         rafId = requestAnimationFrame(paint);
       }
     }
+
+    navUp.addEventListener('click', () => addDelta(-1));
+    navDown.addEventListener('click', () => addDelta(1));
 
     container.addEventListener('wheel', (e) => {
       const goingDown = e.deltaY > 0;
@@ -288,6 +330,26 @@
 
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
+  // mismas flechitas que en las paradas genéricas, un tramo (PHASE)
+  // a la vez.
+  const navUp = document.createElement('button');
+  navUp.type = 'button';
+  navUp.className = 'stop-nav stop-nav--up';
+  navUp.setAttribute('aria-label', 'Anterior');
+  navUp.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>';
+  const navDown = document.createElement('button');
+  navDown.type = 'button';
+  navDown.className = 'stop-nav stop-nav--down';
+  navDown.setAttribute('aria-label', 'Siguiente');
+  navDown.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 19l7-7h-4V5h-6v7H5z" fill="currentColor"/></svg>';
+  heroReveal.appendChild(navUp);
+  heroReveal.appendChild(navDown);
+
+  function updateNav() {
+    navUp.hidden = shown <= 0.02;
+    navDown.hidden = shown >= MAX_PROGRESS - 0.02;
+  }
+
   // "ya no hay nada más" solo cuenta en Inicio, si el usuario ya
   // cambió de vista no tiene sentido que el menú se quede grande
   function updateAtEnd() {
@@ -315,6 +377,7 @@
     heroReveal.style.setProperty('--fade', String(fade));
     heroReveal.style.setProperty('--events', String(events));
     updateAtEnd();
+    updateNav();
 
     if (shown !== target) {
       rafId = requestAnimationFrame(render);
@@ -356,6 +419,9 @@
       rafId = requestAnimationFrame(render);
     }
   }
+
+  navUp.addEventListener('click', () => addDelta(-PHASE));
+  navDown.addEventListener('click', () => addDelta(PHASE));
 
   heroReveal.addEventListener('wheel', (e) => {
     const goingDown = e.deltaY > 0;

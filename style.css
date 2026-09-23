@@ -33,6 +33,7 @@
   .stops{
     position: relative;
     height: calc(100vh - var(--header-h, 84px));
+    height: calc(100dvh - var(--header-h, 84px));
     overflow: hidden;
     touch-action: none;
   }
@@ -62,6 +63,30 @@
     color: var(--gold);
     text-align: center;
   }
+
+  /* flechitas de "hay más" / "hay antes", chiquitas, sobre
+     cualquier parada, para quien no se dé cuenta de que se puede
+     seguir bajando o subiendo. */
+  .stop-nav{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(246,241,232,.35);
+    background: rgba(0,0,0,.28);
+    backdrop-filter: blur(4px);
+    color: var(--bone);
+    cursor: pointer;
+    transition: background .15s var(--ease-out), transform .15s var(--ease-out);
+  }
+  .stop-nav:hover{ background: rgba(0,0,0,.45); }
+  .stop-nav:active{ transform: translateX(-50%) scale(0.94); }
+  .stop-nav[hidden]{ display: none; }
+  .stop-nav--up{ top: 16px; }
+  .stop-nav--down{ bottom: 16px; }
 
   .eyebrow{
     font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
@@ -97,6 +122,11 @@
   /* el velo con el hueco (SVG a pantalla completa) */
   #veil{
     position:fixed;inset:0;width:100%;height:100%;
+    /* en mobile la barra del navegador se esconde y aparece, y
+       "100%"/"100vh" a veces queda corto o largo de más justo en
+       ese instante — con esto se ajusta siempre a lo que se ve
+       de verdad, así nunca se alcanza a ver nada detrás del velo. */
+    height:100dvh;
     z-index:20;display:block;
     touch-action:none;                 /* que el dedo no scrollee la página */
   }
@@ -250,6 +280,34 @@
 .menu-panel.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
 
 .menu-col{ display: flex; flex-direction: column; gap: 10px; min-width: 170px; }
+.menu-group{ display: flex; flex-direction: column; }
+.menu-group-head{
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+/* el botón "+" para desplegar solo existe visualmente en mobile
+   (ver media query más abajo); en web el grupo ya está abierto
+   siempre y este botón ni se muestra. */
+.menu-group-toggle{
+  display: none;
+  flex: none;
+  width: 28px; height: 28px;
+  align-items: center; justify-content: center;
+  background: none; border: 1px solid rgba(246,241,232,.3); border-radius: 999px;
+  cursor: pointer;
+}
+.menu-group-toggle span{
+  position: relative; display: block; width: 10px; height: 10px;
+}
+.menu-group-toggle span::before,
+.menu-group-toggle span::after{
+  content: ""; position: absolute; background: var(--bone);
+  transition: transform .2s var(--ease-out);
+}
+.menu-group-toggle span::before{ left: 0; top: 50%; width: 100%; height: 1.5px; transform: translateY(-50%); }
+.menu-group-toggle span::after{ top: 0; left: 50%; width: 1.5px; height: 100%; transform: translateX(-50%); }
+.menu-group.open .menu-group-toggle span::after{ transform: translateX(-50%) scaleY(0); }
+
+.menu-group-links{ display: flex; flex-direction: column; gap: 10px; }
 .menu-col-title{
   font-family: 'Fraunces', serif; font-weight: 600;
   font-size: clamp(1.2rem, 1.8vw, 1.5rem);
@@ -288,6 +346,27 @@
     gap: 24px;
     max-height: calc(100vh - var(--header-h));
     overflow-y: auto;
+  }
+  /* en mobile la lista completa es demasiado larga: cada grupo
+     empieza cerrado (solo título) y se abre al tocar el "+". El
+     título en sí sigue siendo un link normal, así que tocarlo
+     todavía lleva directo a esa sección. */
+  .menu-group-toggle{ display: flex; }
+  .menu-group-links{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s var(--ease-out);
+  }
+  .menu-group.open .menu-group-links{
+    max-height: 480px; /* de sobra para el grupo más largo (Escuchar) */
+    margin-top: 10px;
+  }
+  /* en pantallas angostas "cover" recortaba al hombre por el borde
+     izquierdo; corrido así se ve completo, y todavía se alcanza a
+     ver algo de la mujer al lado. Solo aplica en mobile, en
+     pantallas grandes se queda como estaba. */
+  .hero-photo img{
+    object-position: 38% 8%;
   }
 }
 
@@ -362,7 +441,8 @@ body.hero-at-end .menu-toggle{
 /* el hero: foto, luego video, con el versículo y los horarios
    flotando encima, todo controlado por site.js con la rueda o el dedo */
 .hero-reveal{
-  height: calc(100vh - var(--header-h, 84px)); /* una pantalla completa */
+  height: calc(100vh - var(--header-h, 84px)); /* respaldo para navegadores viejos */
+  height: calc(100dvh - var(--header-h, 84px)); /* una pantalla completa de verdad en mobile */
   flex-shrink: 0;        /* restando el header, si no sobra un poco */
   position: relative;
   overflow: hidden;

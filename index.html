@@ -117,64 +117,129 @@
     </button>
   </header>
 
-  <!-- un solo panel, todas las secciones en columnas, se abre con hover -->
+  <!-- un solo panel, todas las secciones en columnas, se abre con hover.
+       En mobile cada grupo (título + sus links) se puede desplegar
+       aparte con el botón "+" — en web siempre se ven todos abiertos. -->
   <nav id="menu-panel" class="menu-panel">
     <div class="menu-col">
-      <a href="#conocenos" data-view="conocenos" class="menu-col-title">Conócenos</a>
-      <a href="#conocenos" data-view="conocenos" data-stop="0">Misión</a>
-      <a href="#conocenos" data-view="conocenos" data-stop="1">Visión</a>
-      <a href="#conocenos" data-view="conocenos" data-stop="2">Valores</a>
-      <a href="#conocenos" data-view="conocenos" data-stop="3">En qué creemos</a>
-      <a href="#conocenos" data-view="conocenos" data-stop="4">Nuestra historia</a>
-      <a href="#ministerios" data-view="ministerios" data-stop="0" class="menu-col-sub">Ministerios</a>
-      <a href="#ministerios" data-view="ministerios" data-stop="0">Niños</a>
-      <a href="#ministerios" data-view="ministerios" data-stop="1">Jóvenes</a>
-      <a href="#ministerios" data-view="ministerios" data-stop="2">Parejas</a>
-      <a href="#ministerios" data-view="ministerios" data-stop="3">Familias y adultos</a>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#conocenos" data-view="conocenos" class="menu-col-title">Conócenos</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Conócenos"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#conocenos" data-view="conocenos" data-stop="0">Misión</a>
+          <a href="#conocenos" data-view="conocenos" data-stop="1">Visión</a>
+          <a href="#conocenos" data-view="conocenos" data-stop="2">Valores</a>
+          <a href="#conocenos" data-view="conocenos" data-stop="3">En qué creemos</a>
+          <a href="#conocenos" data-view="conocenos" data-stop="4">Nuestra historia</a>
+        </div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#ministerios" data-view="ministerios" data-stop="0" class="menu-col-sub">Ministerios</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Ministerios"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#ministerios" data-view="ministerios" data-stop="0">Niños</a>
+          <a href="#ministerios" data-view="ministerios" data-stop="1">Jóvenes</a>
+          <a href="#ministerios" data-view="ministerios" data-stop="2">Parejas</a>
+          <a href="#ministerios" data-view="ministerios" data-stop="3">Familias y adultos</a>
+        </div>
+      </div>
     </div>
     <div class="menu-col">
-      <a href="#visitanos" data-view="visitanos" class="menu-col-title">Visítanos</a>
-      <a href="#visitanos" data-view="visitanos" data-stop="0">Sedes y cómo llegar</a>
-      <a href="#visitanos" data-view="visitanos" data-stop="1">Horarios de reuniones</a>
-      <a href="#visitanos" data-view="visitanos" data-stop="2">Qué esperar en tu primera visita</a>
-      <a href="#visitanos" data-view="visitanos" data-stop="3">Planea tu visita a Bogotá</a>
-      <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="0" class="menu-col-sub">Eventos especiales</a>
-      <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="0">Eventos en Bogotá</a>
-      <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="1">Cruzadas</a>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#visitanos" data-view="visitanos" class="menu-col-title">Visítanos</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Visítanos"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#visitanos" data-view="visitanos" data-stop="0">Sedes y cómo llegar</a>
+          <a href="#visitanos" data-view="visitanos" data-stop="1">Horarios de reuniones</a>
+          <a href="#visitanos" data-view="visitanos" data-stop="2">Qué esperar en tu primera visita</a>
+          <a href="#visitanos" data-view="visitanos" data-stop="3">Planea tu visita a Bogotá</a>
+        </div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="0" class="menu-col-sub">Eventos especiales</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Eventos especiales"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="0">Eventos en Bogotá</a>
+          <a href="#eventos-especiales" data-view="eventos-especiales" data-stop="1">Cruzadas</a>
+        </div>
+      </div>
     </div>
     <div class="menu-col">
-      <a href="#necesito-ayuda" data-view="necesito-ayuda" class="menu-col-title">Necesito ayuda</a>
-      <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="0">Oración telefónica</a>
-      <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="1">Necesito consejería</a>
-      <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="2">Solicitar una visita</a>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#necesito-ayuda" data-view="necesito-ayuda" class="menu-col-title">Necesito ayuda</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Necesito ayuda"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="0">Oración telefónica</a>
+          <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="1">Necesito consejería</a>
+          <a href="#necesito-ayuda" data-view="necesito-ayuda" data-stop="2">Solicitar una visita</a>
+        </div>
+      </div>
     </div>
     <div class="menu-col">
       <a href="#contenido" data-view="contenido" class="menu-col-title">Contenido</a>
-      <a href="#ver" data-view="ver" data-stop="0" class="menu-col-sub">Ver</a>
-      <a href="#ver" data-view="ver" data-stop="0">Servicio en vivo</a>
-      <a href="#ver" data-view="ver" data-stop="1">Canal ABN en vivo</a>
-      <a href="#ver" data-view="ver" data-stop="2">Prédicas</a>
-      <a href="#ver" data-view="ver" data-stop="3">Programas</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="0" class="menu-col-sub">Escuchar</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="0">Devocionales</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="1">Prédicas</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="2">Aviva2 Radio en vivo</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="3">Podcast</a>
-      <a href="#escuchar" data-view="escuchar" data-stop="4">Playlists</a>
-      <a href="#leer" data-view="leer" data-stop="0" class="menu-col-sub">Leer</a>
-      <a href="#leer" data-view="leer" data-stop="0">Blog</a>
-      <a href="#leer" data-view="leer" data-stop="1">Plan de lectura</a>
-      <a href="#leer" data-view="leer" data-stop="2">Libros de nuestros pastores</a>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#ver" data-view="ver" data-stop="0" class="menu-col-sub">Ver</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Ver"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#ver" data-view="ver" data-stop="0">Servicio en vivo</a>
+          <a href="#ver" data-view="ver" data-stop="1">Canal ABN en vivo</a>
+          <a href="#ver" data-view="ver" data-stop="2">Prédicas</a>
+          <a href="#ver" data-view="ver" data-stop="3">Programas</a>
+        </div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#escuchar" data-view="escuchar" data-stop="0" class="menu-col-sub">Escuchar</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Escuchar"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#escuchar" data-view="escuchar" data-stop="0">Devocionales</a>
+          <a href="#escuchar" data-view="escuchar" data-stop="1">Prédicas</a>
+          <a href="#escuchar" data-view="escuchar" data-stop="2">Aviva2 Radio en vivo</a>
+          <a href="#escuchar" data-view="escuchar" data-stop="3">Podcast</a>
+          <a href="#escuchar" data-view="escuchar" data-stop="4">Playlists</a>
+        </div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <a href="#leer" data-view="leer" data-stop="0" class="menu-col-sub">Leer</a>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Leer"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#leer" data-view="leer" data-stop="0">Blog</a>
+          <a href="#leer" data-view="leer" data-stop="1">Plan de lectura</a>
+          <a href="#leer" data-view="leer" data-stop="2">Libros de nuestros pastores</a>
+        </div>
+      </div>
     </div>
     <div class="menu-col">
-      <p class="menu-col-title menu-col-title--plain">Avivamiento Academy</p>
-      <a href="#">Encuentros con Jesús</a>
-      <a href="#">Escuelas de formación</a>
-      <a href="#">Instituto Bíblico</a>
-      <a href="#">La plataforma de los cursos</a>
-      <a href="#">Avivamiento Home School</a>
-      <a href="#">Gimnasio Campestre Cristiano</a>
-      <a href="#">Avivamiento Faith College</a>
+      <div class="menu-group">
+        <div class="menu-group-head">
+          <p class="menu-col-title menu-col-title--plain">Avivamiento Academy</p>
+          <button type="button" class="menu-group-toggle" aria-expanded="false" aria-label="Mostrar submenú de Avivamiento Academy"><span></span></button>
+        </div>
+        <div class="menu-group-links">
+          <a href="#">Encuentros con Jesús</a>
+          <a href="#">Escuelas de formación</a>
+          <a href="#">Instituto Bíblico</a>
+          <a href="#">La plataforma de los cursos</a>
+          <a href="#">Avivamiento Home School</a>
+          <a href="#">Gimnasio Campestre Cristiano</a>
+          <a href="#">Avivamiento Faith College</a>
+        </div>
+      </div>
     </div>
   </nav>
 
