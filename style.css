@@ -620,7 +620,6 @@ body.hero-at-end .hero-schedule .meta strong{
   background-repeat: no-repeat;
   transform: translateY(calc((1 - var(--events, 0)) * 100%));
 }
-
 .hero-events-inner{
   max-width: 1100px;
   margin: 0 auto;
