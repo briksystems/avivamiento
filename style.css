@@ -429,6 +429,10 @@ body.hero-at-end .menu-toggle{
   padding: 24px clamp(20px, 5vw, 56px);
   border-top: 1px solid var(--hairline);
   text-align: center;
+  background-image: url('barra-footer.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .site-footer p{
   margin: 0;
@@ -610,10 +614,13 @@ body.hero-at-end .hero-schedule .meta strong{
   z-index: 3;
   /* mismo degradado del fondo del sitio, de borde a borde, para que
      se vea como un bloque propio y no transparente sobre el video */
-  background:
-    radial-gradient(120% 90% at 50% 8%, #7A1E08 0%, #3A1005 45%, #180705 100%);
+    background-image: url('barra-footer.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   transform: translateY(calc((1 - var(--events, 0)) * 100%));
 }
+
 .hero-events-inner{
   max-width: 1100px;
   margin: 0 auto;
