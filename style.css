@@ -167,9 +167,11 @@
   justify-content: space-between;
   gap: 16px;
   padding: 10px clamp(20px, 5vw, 56px);
-  /* deja ver el video de fondo, ya no lo tapa */
-  background: rgba(0,0,0,.22);
-  backdrop-filter: blur(2px);
+  background-color: #1a1a1a; /* respaldo mientras carga la imagen */
+  background-image: url('barra-header.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -284,50 +286,50 @@
 /* el disparador es el título completo de la sección: ocupa todo el
    ancho de la columna para que el área de toque sea grande, con el
    ícono "+" a la derecha que gira a "×" al abrir. */
-.menu-group-trigger{
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  width: 100%;
-  background: none; border: none; cursor: pointer;
-  padding: 10px 0;
-  text-align: left;
+.menu-group-head{
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
-.menu-group-trigger-label{
+.menu-group-title{
   font-family: 'Fraunces', serif; font-weight: 600;
   font-size: clamp(1.2rem, 1.8vw, 1.5rem);
   color: var(--bone);
+  text-decoration: none;
   transition: color .15s var(--ease-out);
 }
-.menu-group-trigger:hover .menu-group-trigger-label{ color: var(--gold); }
+.menu-group-title:hover{ color: var(--gold); }
+/* "Avivamiento Academy" no tiene sección propia todavía, así que
+   su título no es un link, solo la etiqueta de la columna. */
+.menu-group-title--plain{ cursor: default; }
+.menu-group-title--plain:hover{ color: var(--bone); }
 
-.menu-group-icon{
-  flex: none; position: relative;
+/* la cruz: gira a "×" cuando su grupo está abierto. Aparte del
+   título, así que tocar el nombre lleva a la sección y tocar la
+   cruz solo abre o cierra la lista. */
+.menu-group-toggle{
+  display: none; /* solo existe en mobile, ver media query */
+  flex: none;
   width: 28px; height: 28px;
-  border: 1px solid rgba(246,241,232,.3); border-radius: 999px;
-  transition: border-color .15s var(--ease-out), transform .3s var(--ease-out);
+  align-items: center; justify-content: center;
+  background: none; border: 1px solid rgba(246,241,232,.3); border-radius: 999px;
+  cursor: pointer;
 }
-.menu-group-trigger:hover .menu-group-icon{ border-color: var(--gold); }
-.menu-group-icon::before,
-.menu-group-icon::after{
+.menu-group-toggle span{ position: relative; display: block; width: 10px; height: 10px; }
+.menu-group-toggle span::before,
+.menu-group-toggle span::after{
   content: ""; position: absolute; background: var(--bone);
-  transition: transform .3s var(--ease-out), background .15s var(--ease-out);
+  transition: transform .25s var(--ease-out);
 }
-.menu-group-icon::before{ left: 6px; top: 50%; width: 14px; height: 1.5px; transform: translateY(-50%); }
-.menu-group-icon::after{ top: 6px; left: 50%; width: 1.5px; height: 14px; transform: translateX(-50%); }
-.menu-group-trigger:hover .menu-group-icon::before,
-.menu-group-trigger:hover .menu-group-icon::after{ background: var(--gold); }
-.menu-group[data-open="true"] .menu-group-icon{ transform: rotate(90deg); }
-.menu-group[data-open="true"] .menu-group-icon::after{ transform: translateX(-50%) scaleY(0); }
+.menu-group-toggle span::before{ left: 0; top: 50%; width: 100%; height: 1.5px; transform: translateY(-50%); }
+.menu-group-toggle span::after{ top: 0; left: 50%; width: 1.5px; height: 100%; transform: translateX(-50%); }
+.menu-group[data-open="true"] > .menu-group-head .menu-group-toggle span::after{ transform: translateX(-50%) scaleY(0); }
 
-/* alto real animado (no un max-height inventado): el panel es una
-   grilla de una sola fila que crece de 0fr a 1fr, así el contenido
-   nunca queda cortado ni sobra espacio de más. */
+/* en desktop las 5 secciones siempre están abiertas de una, como
+   antes: el panel arranca ya expandido y ahí se queda. */
 .menu-group-panel{
   display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows .35s var(--ease-out);
+  grid-template-rows: 1fr;
 }
 .menu-group-panel-inner{ overflow: hidden; }
-.menu-group[data-open="true"] .menu-group-panel{ grid-template-rows: 1fr; }
 
 .menu-links{ display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
 .menu-links a{
@@ -343,8 +345,10 @@
 
 /* sub-sección (Ministerios, Eventos especiales, Ver, Escuchar,
    Leer): agrupada bajo su H1 en el menú, pero es su propia sección
-   independiente — el título dorado ya lleva directo a ella. */
+   independiente, con su propia cruz — el título dorado ya lleva
+   directo a ella. */
 .menu-subgroup{ padding-bottom: 6px; }
+.menu-subgroup .menu-group-head{ margin-bottom: 4px; }
 .menu-subgroup-title{
   display: block;
   font: 700 .68rem/1 'Archivo', sans-serif;
@@ -354,12 +358,13 @@
   text-decoration: none;
   text-underline-offset: 3px;
   opacity: .85;
-  margin-bottom: 10px;
   width: fit-content;
   transition: opacity .15s var(--ease-out);
 }
 .menu-subgroup-title:hover,
 .menu-subgroup-title:focus-visible{ opacity: 1; text-decoration: underline; }
+.menu-subgroup .menu-group-toggle{ width: 22px; height: 22px; }
+.menu-subgroup .menu-group-toggle span{ width: 8px; height: 8px; }
 .menu-subgroup .menu-links{ padding-top: 0; }
 
 @media (max-width: 760px){
@@ -369,12 +374,24 @@
     max-height: calc(100vh - var(--header-h));
     overflow-y: auto;
   }
+  /* en mobile sí arranca cerrado: solo las 5 secciones grandes, y
+     tocar el nombre (no un botón aparte, ya no hay cruz) despliega
+     todo lo suyo. En desktop esto no aplica, ahí queda siempre
+     abierto (ver la regla base más arriba). */
+  .menu-group-toggle{ display: flex; transition: border-color .15s var(--ease-out); }
+  .menu-group-toggle:hover,
+  .menu-group-toggle:active{ border-color: var(--gold); }
+  .menu-group-panel{
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .35s var(--ease-out);
+  }
+  .menu-group[data-open="true"] > .menu-group-panel{ grid-template-rows: 1fr; }
   /* en pantallas angostas "cover" recortaba al hombre por el borde
      izquierdo; corrido así se ve completo, y todavía se alcanza a
      ver algo de la mujer al lado. Solo aplica en mobile, en
      pantallas grandes se queda como estaba. */
   .hero-photo img{
-    object-position: 38% 8%;
+    object-position: 38% 42%;
   }
 }
 
@@ -474,8 +491,10 @@ body.hero-at-end .menu-toggle{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* si hay que recortar, que sea de la multitud, no de las cabezas */
-  object-position: center 8%;
+  /* si hay que recortar, que sea de la multitud, no de las cabezas.
+     el 42% vertical es el punto donde quedan justo debajo del
+     header, sin dejar un hueco vacío arriba. */
+  object-position: center 42%;
 }
 
 /* la foto se desvanece más despacio que el versículo, para que el
