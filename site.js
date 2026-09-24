@@ -82,15 +82,47 @@
 // vez (sus links propios y, si tiene, sus sub-secciones doradas
 // con los suyos). Ninguna de las dos está atada a la otra, así que
 // se pueden tener varias abiertas al mismo tiempo.
+// cada cruz abre o cierra su propio grupo. Al abrir uno se cierran
+// sus hermanos del mismo nivel: las 5 secciones grandes se
+// excluyen entre sí (aunque cada una viva en su propia columna), y
+// las doradas se excluyen entre sí, pero solo con sus hermanas
+// dentro de la misma grande (una dorada y su grande no se pisan,
+// las dos pueden quedar abiertas juntas).
 (function initMenuGroups() {
-  document.querySelectorAll('.menu-group-trigger').forEach((btn) => {
+  function closeGroup(group) {
+    group.dataset.open = 'false';
+    const btn = group.querySelector(':scope > .menu-group-head > .menu-group-toggle');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function openGroup(group) {
+    group.dataset.open = 'true';
+    const btn = group.querySelector(':scope > .menu-group-head > .menu-group-toggle');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+  function siblingsOf(group) {
+    const parentGroup = group.parentElement.closest('.menu-group');
+    if (!parentGroup) {
+      // una de las 5 grandes: sus hermanas son las otras 4, aunque
+      // cada una viva en su propia columna
+      return Array.from(document.querySelectorAll('.menu-panel > .menu-col > .menu-group'));
+    }
+    // una dorada: sus hermanas son las demás doradas dentro de la
+    // misma grande, no la grande en sí
+    return Array.from(group.parentElement.querySelectorAll(':scope > .menu-group'));
+  }
+
+  document.querySelectorAll('.menu-group-toggle').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const group = btn.closest('.menu-group');
-      const open = group.dataset.open === 'true';
-      group.dataset.open = String(!open);
-      btn.setAttribute('aria-expanded', String(!open));
+      const wasOpen = group.dataset.open === 'true';
+
+      siblingsOf(group).forEach((sib) => {
+        if (sib !== group) closeGroup(sib);
+      });
+
+      wasOpen ? closeGroup(group) : openGroup(group);
     });
   });
 })();
