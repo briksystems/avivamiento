@@ -612,9 +612,9 @@ body.hero-at-end .hero-schedule .meta strong{
   right: 0;
   bottom: 0;
   z-index: 3;
-  /* mismo degradado del fondo del sitio, de borde a borde, para que
-     se vea como un bloque propio y no transparente sobre el video */
-    background-image: url('barra-footer.png');
+  /* misma imagen del footer, de borde a borde, para que se vea
+     como un bloque propio y no transparente sobre el video */
+  background-image: url('barra-footer.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
