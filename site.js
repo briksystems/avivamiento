@@ -404,14 +404,14 @@
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   async function autoPlayIntro() {
-    await wait(500);
-    await tweenTo(PHASE, 2200);           // foto -> video actual (antes muy rápido, ahora parejo)
-    await wait(700);
-    await tweenTo(PHASE * 2, 1900);       // sube el versículo
     await wait(900);
-    await tweenTo(PHASE * 3, 1900);       // cambia a predica.mp4
-    await wait(500);
-    await tweenTo(PHASE * 4, 1900);       // versículo sale, suben horarios + botón
+    await tweenTo(PHASE, 3400);           // foto -> video actual, lento: que se note que hay foto
+    await wait(300);
+    await tweenTo(PHASE * 2, 1200);        // sube el versículo, rápido
+    await wait(350);
+    await tweenTo(PHASE * 3, 1300);        // cambia a predica.mp4, rápido
+    await wait(300);
+    await tweenTo(PHASE * 4, 1300);        // versículo sale, suben horarios + botón, rápido
     autoPlaying = false;
     follow = FOLLOW_MANUAL;
     updateNav(); // acá aparece la flecha hacia eventos
