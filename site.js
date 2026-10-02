@@ -1,6 +1,5 @@
-// site.js: todo lo que no es la intro (header, menú, navegación
-// entre vistas, y el hero con foto/video/versículo).
-// script.js (la intro) es un archivo separado, no se toca.
+// site.js: todo menos la intro (header, menú, vistas, hero).
+// script.js es la intro, aparte.
 
 // año del footer
 (function initFooterYear() {
@@ -8,7 +7,7 @@
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 })();
 
-// alto real del header, para que el mega menú sepa dónde empezar
+// alto real del header para el menú
 (function initHeaderHeight() {
   const header = document.querySelector('.topbar');
   if (!header) return;
@@ -22,16 +21,13 @@
   window.addEventListener('load', setHeaderVar);
 })();
 
-// menú: se abre con hover (mouse) o con un toque (touch)
+// menú: hover en mouse, click en touch
 (function initMobileMenu() {
   const toggle = document.getElementById('menu-toggle');
   const panel = document.getElementById('menu-panel');
   if (!toggle || !panel) return;
 
-  // en touch, tocar el botón dispara un "hover" sintético que
-  // termina solo, disparando un mouseleave justo después y
-  // cerrando el panel de una. Por eso el hover solo se usa en
-  // dispositivos que de verdad tienen mouse.
+  // en touch el hover queda pegado, por eso solo con mouse real
   const canHover = matchMedia('(hover: hover)').matches;
 
   let closeTimer = null;
@@ -77,17 +73,7 @@
   window.__closeMegaMenus = closeMenu;
 })();
 
-// cada una de las 5 secciones grandes del menú empieza cerrada,
-// mostrando solo el título; tocarlo despliega todo lo suyo de una
-// vez (sus links propios y, si tiene, sus sub-secciones doradas
-// con los suyos). Ninguna de las dos está atada a la otra, así que
-// se pueden tener varias abiertas al mismo tiempo.
-// cada cruz abre o cierra su propio grupo. Al abrir uno se cierran
-// sus hermanos del mismo nivel: las 5 secciones grandes se
-// excluyen entre sí (aunque cada una viva en su propia columna), y
-// las doradas se excluyen entre sí, pero solo con sus hermanas
-// dentro de la misma grande (una dorada y su grande no se pisan,
-// las dos pueden quedar abiertas juntas).
+// cruces del menú: exclusivas por nivel (grandes entre sí, doradas entre sí)
 (function initMenuGroups() {
   function closeGroup(group) {
     group.dataset.open = 'false';
@@ -102,12 +88,10 @@
   function siblingsOf(group) {
     const parentGroup = group.parentElement.closest('.menu-group');
     if (!parentGroup) {
-      // una de las 5 grandes: sus hermanas son las otras 4, aunque
-      // cada una viva en su propia columna
+      // una grande: hermanas son las otras 4
       return Array.from(document.querySelectorAll('.menu-panel > .menu-col > .menu-group'));
     }
-    // una dorada: sus hermanas son las demás doradas dentro de la
-    // misma grande, no la grande en sí
+    // una dorada: hermanas son las demás doradas de su misma grande
     return Array.from(group.parentElement.querySelectorAll(':scope > .menu-group'));
   }
 
@@ -127,10 +111,7 @@
   });
 })();
 
-// navegación: cada sección es un .view, solo se muestra la .active.
-// Algunas vistas además tienen "paradas" adentro (ver
-// initStopSections más abajo): si el link que se clickeó trae
-// data-stop, saltamos directo a esa parada en vez de a la primera.
+// cambia de .view; si el link trae data-stop, salta directo a esa parada
 (function initViewNav() {
   const views = document.querySelectorAll('.view');
   const backBtn = document.getElementById('back-home');
@@ -152,9 +133,6 @@
     window.scrollTo({ top: 0, behavior: 'auto' });
     history.replaceState(null, '', '#' + id);
 
-    // si esta vista tiene paradas y nos dijeron a cuál ir, saltamos
-    // ahí directo (si no, se queda en la primera, que es donde ya
-    // estaba por defecto)
     const controller = window.__stopSections && window.__stopSections[id];
     if (controller && typeof stopIndex === 'number') controller.goTo(stopIndex);
 
@@ -178,15 +156,7 @@
   switchView((location.hash || '#inicio').slice(1));
 })();
 
-// paradas: el mismo recorrido de foto→video→versículo del hero,
-// pero genérico, para cualquier sección con varias "pantallas"
-// seguidas (.stop) dentro de un .stops. Sirve para las 9 secciones
-// nuevas del menú (Conócenos, Ministerios, Visítanos, etc.) — cada
-// una arma su propio recorrido con este mismo motor, sin repetir
-// el código. Misma idea que el hero: "target" es a dónde vamos,
-// "shown" lo persigue suave, y hay una pausa breve (en los dos
-// sentidos) en cada parada para que cada una tenga su momento
-// quieto antes de seguir.
+// paradas genéricas: rueda/dedo mueve .stop uno a uno, con pausa en cada una
 (function initStopSections() {
   const sections = document.querySelectorAll('.stops');
   if (!sections.length) return;
@@ -213,9 +183,7 @@
     let pauseSince = null;
     const MAX = stops.length - 1;
 
-    // las dos flechas, chiquitas, para quien no se dé cuenta de que
-    // se puede seguir bajando (o subiendo). Se crean por JS para no
-    // repetir el mismo HTML en las 9 secciones.
+    // flechas de más arriba/abajo, generadas por JS para no repetirlas en el HTML
     const navUp = document.createElement('button');
     navUp.type = 'button';
     navUp.className = 'stop-nav stop-nav--up';
@@ -324,48 +292,42 @@
   });
 })();
 
-// el hero: foto → video → versículo → horarios → eventos, todo con
-// la misma rueda/dedo, nunca con el scroll normal de la página.
-// Cuatro tramos seguidos, nunca al mismo tiempo:
-//   1. fade:   se difumina la foto y aparece el video
-//   2. reveal: sube el versículo
-//   3. exit:   el versículo sale y suben los horarios
-//   4. events: los horarios salen y sube el aviso de eventos
-// "target" es a dónde vamos (lo mueve la rueda al instante).
-// "shown" es lo que se pinta, y persigue a "target" cuadro a
-// cuadro para que el movimiento sea fluido y no a saltos.
+// el hero de Inicio: foto -> video actual -> versículo -> predica.mp4 ->
+// horarios (con botón "Ver prédica"), todo automático y sin rueda ni dedo.
+// Al llegar a horarios, si el usuario se queda ahí, aparece la flecha para
+// bajar manualmente a eventos.
 (function initHeroReveal() {
   const heroReveal = document.getElementById('hero-reveal');
-  const video = document.querySelector('.hero-video video');
+  const videoActual = heroReveal && heroReveal.querySelector('.hero-video:not(.hero-video--predica) video');
+  const videoPredica = heroReveal && heroReveal.querySelector('.hero-video--predica video');
+  const btnVerPredica = document.getElementById('btn-ver-predica');
   if (!heroReveal) return;
 
-  const PHASE = 2 / 3;             // cuánto dura cada tramo
-  const MAX_PROGRESS = PHASE * 4;  // los cuatro tramos, uno detrás del otro
-  const WHEEL_TO_END = 640;  // cuánto scroll hace falta
-  const TOUCH_TO_END = 190;  // px de dedo necesarios
-  const FOLLOW = 0.16;       // qué tanto se acerca "shown" a "target" cada frame
-  const AT_END_THRESHOLD = MAX_PROGRESS - 0.02; // desde aquí ya es "el final"
+  const PHASE = 2 / 3;             // dura cada tramo
+  // foto→video, video→versículo, versículo→predica, predica→horarios, horarios→eventos
+  const MAX_PROGRESS = PHASE * 5;
+  const WHEEL_TO_END = 640;
+  const TOUCH_TO_END = 190;
+  const FOLLOW_MANUAL = 0.16; // velocidad con rueda/dedo, ya manual
+  const AT_END_THRESHOLD = MAX_PROGRESS - 0.02;
+  const PREDICA_STOP = PHASE * 3; // "video limpio" al que vuelve el botón Ver prédica
 
   let target = 0;
   let shown = 0;
+  let follow = FOLLOW_MANUAL;
   let rafId = null;
   let lastTouchY = null;
+  let autoPlaying = true; // true mientras dura el recorrido automático
 
-  // una pausa breve en cada parada del camino (fin del versículo,
-  // fin de los horarios), en los dos sentidos: cada sección tiene
-  // su propio momento quieto antes de seguir, tanto al bajar como
-  // al subir. Nunca se suelta el scroll hacia la página: acá ya no
-  // hay nada más abajo, todo (foto, video, versículo, horarios y
-  // eventos) vive dentro de este mismo recorrido.
-  const MID_CHECKPOINTS = [PHASE * 2, PHASE * 3];
+  const MID_CHECKPOINTS = [PHASE, PHASE * 2, PHASE * 3, PHASE * 4];
   let pausedAt = null;
   let pauseSince = null;
   const PAUSE_MS = 550;
 
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+  const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  // mismas flechitas que en las paradas genéricas, un tramo (PHASE)
-  // a la vez.
+  // flechitas, un tramo (PHASE) a la vez
   const navUp = document.createElement('button');
   navUp.type = 'button';
   navUp.className = 'stop-nav stop-nav--up';
@@ -380,12 +342,12 @@
   heroReveal.appendChild(navDown);
 
   function updateNav() {
-    navUp.hidden = shown <= 0.02;
-    navDown.hidden = shown >= MAX_PROGRESS - 0.02;
+    // mientras es automático no hay nada que clickear todavía
+    navUp.hidden = autoPlaying || shown <= 0.02;
+    navDown.hidden = autoPlaying || shown >= MAX_PROGRESS - 0.02;
   }
 
-  // "ya no hay nada más" solo cuenta en Inicio, si el usuario ya
-  // cambió de vista no tiene sentido que el menú se quede grande
+  // "ya no hay más" solo importa en Inicio
   function updateAtEnd() {
     const activeView = document.querySelector('.view.active');
     const isInicio = activeView && activeView.dataset.viewId === 'inicio';
@@ -394,37 +356,71 @@
 
   document.addEventListener('site:viewchange', updateAtEnd);
 
-  function render() {
-    const diff = target - shown;
-    if (Math.abs(diff) < 0.001) {
-      shown = target;
-    } else {
-      shown += diff * FOLLOW;
-    }
+  // aplica las variables CSS según "shown", sin tocar el reloj de nadie
+  function applyVisual() {
+    const fade = clamp(shown / PHASE, 0, 1);                       // tramo 1: foto -> video actual
+    const reveal = clamp((shown - PHASE) / PHASE, 0, 1);           // tramo 2: sube el versículo
+    const predica = clamp((shown - PHASE * 2) / PHASE, 0, 1);      // tramo 3: cambia a predica.mp4
+    const exit = clamp((shown - PHASE * 3) / PHASE, 0, 1);         // tramo 4: versículo sale, suben horarios
+    const events = clamp((shown - PHASE * 4) / PHASE, 0, 1);       // tramo 5: horarios salen, suben eventos
 
-    const fade = clamp(shown / PHASE, 0, 1);
-    const reveal = clamp((shown - PHASE) / PHASE, 0, 1);
-    const exit = clamp((shown - PHASE * 2) / PHASE, 0, 1);
-    const events = clamp((shown - PHASE * 3) / PHASE, 0, 1);
-    heroReveal.style.setProperty('--reveal', String(reveal));
-    heroReveal.style.setProperty('--exit', String(exit));
     heroReveal.style.setProperty('--fade', String(fade));
+    heroReveal.style.setProperty('--reveal', String(reveal));
+    heroReveal.style.setProperty('--predica', String(predica));
+    heroReveal.style.setProperty('--exit', String(exit));
+    heroReveal.style.setProperty('--schedule', String(exit));
     heroReveal.style.setProperty('--events', String(events));
     updateAtEnd();
     updateNav();
+  }
 
-    if (shown !== target) {
-      rafId = requestAnimationFrame(render);
-    } else {
-      rafId = null;
-    }
+  // bucle normal, para cuando ya es manual (rueda/dedo)
+  function render() {
+    const diff = target - shown;
+    shown = Math.abs(diff) < 0.001 ? target : shown + diff * follow;
+    applyVisual();
+    rafId = shown !== target ? requestAnimationFrame(render) : null;
+  }
+
+  function kick() {
+    if (rafId === null) rafId = requestAnimationFrame(render);
+  }
+
+  // avance con duración fija y entrada/salida suave, para el recorrido automático
+  function tweenTo(value, duration) {
+    return new Promise((resolve) => {
+      const from = shown;
+      const t0 = performance.now();
+      (function step(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        shown = from + (value - from) * easeInOutCubic(t);
+        target = shown;
+        applyVisual();
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      })(performance.now());
+    });
+  }
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function autoPlayIntro() {
+    await wait(500);
+    await tweenTo(PHASE, 2200);           // foto -> video actual (antes muy rápido, ahora parejo)
+    await wait(700);
+    await tweenTo(PHASE * 2, 1900);       // sube el versículo
+    await wait(900);
+    await tweenTo(PHASE * 3, 1900);       // cambia a predica.mp4
+    await wait(500);
+    await tweenTo(PHASE * 4, 1900);       // versículo sale, suben horarios + botón
+    autoPlaying = false;
+    follow = FOLLOW_MANUAL;
+    updateNav(); // acá aparece la flecha hacia eventos
   }
 
   function addDelta(fraction) {
+    if (autoPlaying) return; // sin rueda ni dedo durante el recorrido automático
     const before = target;
 
-    // seguimos sentados en una pausa? no importa para qué lado se
-    // quiera mover, no avanza hasta que se cumpla el tiempo.
     if (pausedAt !== null && Math.abs(before - pausedAt) < 0.0005) {
       if (performance.now() - pauseSince < PAUSE_MS) return;
       pausedAt = null;
@@ -435,29 +431,37 @@
     if (fraction > 0) {
       const hit = MID_CHECKPOINTS.find((c) => before < c - 0.0005 && next >= c - 0.0005);
       if (hit !== undefined) {
-        next = hit; // se clava justo ahí y arranca la pausa
+        next = hit;
         pausedAt = hit;
         pauseSince = performance.now();
       }
     } else if (fraction < 0) {
       const hit = MID_CHECKPOINTS.find((c) => before > c + 0.0005 && next <= c + 0.0005);
       if (hit !== undefined) {
-        next = hit; // misma pausa, ahora subiendo
+        next = hit;
         pausedAt = hit;
         pauseSince = performance.now();
       }
     }
 
     target = next;
-    if (target !== before && rafId === null) {
-      rafId = requestAnimationFrame(render);
-    }
+    if (target !== before) kick();
   }
 
   navUp.addEventListener('click', () => addDelta(-PHASE));
   navDown.addEventListener('click', () => addDelta(PHASE));
 
+  if (btnVerPredica) {
+    btnVerPredica.addEventListener('click', () => {
+      if (autoPlaying) return;
+      pausedAt = null;
+      target = PREDICA_STOP;
+      kick();
+    });
+  }
+
   heroReveal.addEventListener('wheel', (e) => {
+    if (autoPlaying) { e.preventDefault(); return; }
     const goingDown = e.deltaY > 0;
     const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
     if (shouldCapture) {
@@ -471,9 +475,10 @@
   }, { passive: true });
 
   heroReveal.addEventListener('touchmove', (e) => {
+    if (autoPlaying) { e.preventDefault(); return; }
     if (lastTouchY === null) return;
     const y = e.touches[0].clientY;
-    const delta = lastTouchY - y; // dedo sube = "baja" el contenido
+    const delta = lastTouchY - y;
     const goingDown = delta > 0;
     const shouldCapture = (goingDown && target < MAX_PROGRESS) || (!goingDown && target > 0);
     if (shouldCapture) {
@@ -485,21 +490,54 @@
 
   heroReveal.addEventListener('touchend', () => { lastTouchY = null; });
 
-  render(); // estado inicial, pase lo que pase con matchMedia
+  applyVisual(); // estado inicial
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    // salta directo al versículo ya visible, sin animación de entrada
-    target = PHASE * 2;
-    shown = PHASE * 2;
-    render();
+    // directo a horarios, sin recorrido automático
+    autoPlaying = false;
+    target = PHASE * 4;
+    shown = PHASE * 4;
+    applyVisual();
+  } else {
+    autoPlaying = true;
+    autoPlayIntro();
   }
 
-  // por si el navegador bloquea el autoplay del video, reintentamos
-  // apenas el usuario mueve la rueda o el dedo por primera vez
-  if (video) {
-    const tryPlay = () => { video.play().catch(() => {}); };
+  // por si el navegador bloquea el autoplay de los videos
+  [videoActual, videoPredica].forEach((v) => {
+    if (!v) return;
+    const tryPlay = () => { v.play().catch(() => {}); };
     tryPlay();
     heroReveal.addEventListener('wheel', tryPlay, { once: true, passive: true });
     heroReveal.addEventListener('touchstart', tryPlay, { once: true, passive: true });
+  });
+})();
+
+// Canal ABN en vivo: hls.js para los navegadores que no leen m3u8 solos
+(function initAbnLive() {
+  const video = document.getElementById('abn-live-video');
+  if (!video) return;
+
+  const src = 'https://s3.abntelevision.com:443/avivamientoabr/stream/playlist.m3u8?avcb=1790890452563';
+
+  function start() {
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = src; // Safari, nativo
+      return;
+    }
+    if (window.Hls && window.Hls.isSupported()) {
+      const hls = new window.Hls();
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    }
+  }
+
+  if (window.Hls) {
+    start();
+  } else {
+    // hls.js llega por CDN desde index.html; si tarda, reintenta una vez cargado
+    const check = setInterval(() => {
+      if (window.Hls) { clearInterval(check); start(); }
+    }, 200);
   }
 })();

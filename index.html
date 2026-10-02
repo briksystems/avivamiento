@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Avivamiento</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%23100D0C'/%3E%3Ctext x='50' y='68' font-size='62' text-anchor='middle' fill='%23F2A93B' font-family='Georgia,serif'%3EA%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=Archivo:wght@400;500;700&display=swap" rel="stylesheet">
@@ -309,6 +310,17 @@
             aria-hidden="true"></video>
         </div>
 
+        <div class="hero-video hero-video--predica">
+          <video
+            src="predica.mp4"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-hidden="true"></video>
+        </div>
+
         <div class="hero-verse">
           <p class="eyebrow">Avivamiento</p>
           <h1 class="verse">
@@ -326,6 +338,7 @@
             <div><span>Domingo</span><strong>8:00 a.m.</strong></div>
             <div><span>Domingo</span><strong>10:30 a.m.</strong></div>
           </div>
+          <button type="button" id="btn-ver-predica" class="btn-gold hero-schedule-btn">Ver prédica</button>
         </div>
 
         <div class="hero-events">
@@ -435,7 +448,14 @@
     <div class="view" id="view-ver" data-view-id="ver">
       <div class="stops">
         <div class="stop"><h1 class="stop-title">Servicio en vivo</h1></div>
-        <div class="stop"><h1 class="stop-title">Canal ABN en vivo</h1></div>
+        <div class="stop">
+          <div class="stop-inner">
+            <h1 class="stop-title">Canal ABN en vivo</h1>
+            <div class="live-player">
+              <video id="abn-live-video" controls autoplay muted playsinline></video>
+            </div>
+          </div>
+        </div>
         <div class="stop"><h1 class="stop-title">Prédicas</h1></div>
         <div class="stop"><h1 class="stop-title">Programas</h1></div>
       </div>
@@ -544,6 +564,7 @@
 
 <p id="hint">Desliza para entrar</p>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js" defer></script>
 <script src="script.js"></script>
 <script src="site.js"></script>
 </body>

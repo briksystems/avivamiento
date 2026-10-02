@@ -25,11 +25,7 @@
     padding:clamp(24px,6vw,96px);max-width:1100px;margin:0 auto;width:100%;
   }
 
-  /* ---------- Paradas: varias pantallas seguidas dentro de una
-     misma sección (Conócenos, Ministerios, Visítanos, etc.) ----------
-     Mismo motor que el hero de Inicio, pero genérico: site.js
-     (initStopSections) mueve cada .stop con la rueda o el dedo,
-     una parada a la vez, con su pausa al llegar a cada una. */
+  /* paradas: varias pantallas dentro de una misma sección */
   .stops{
     position: relative;
     height: calc(100vh - var(--header-h, 84px));
@@ -51,9 +47,7 @@
     max-width: 1100px;
     width: 100%;
   }
-  /* contenido por defecto de una parada mientras no tiene nada más
-     que un título: dorado, misma tipografía que "mi Espíritu" en
-     el versículo grande de Inicio. */
+  /* título solo, dorado, mientras la parada no tiene más contenido */
   .stop-title{
     font-family: 'Fraunces', Georgia, serif;
     font-style: italic;
@@ -64,9 +58,7 @@
     text-align: center;
   }
 
-  /* flechitas de "hay más" / "hay antes", chiquitas, sobre
-     cualquier parada, para quien no se dé cuenta de que se puede
-     seguir bajando o subiendo. */
+  /* flechitas de "hay más" / "hay antes" */
   .stop-nav{
     position: absolute;
     left: 50%;
@@ -122,11 +114,7 @@
   /* el velo con el hueco (SVG a pantalla completa) */
   #veil{
     position:fixed;inset:0;width:100%;height:100%;
-    /* en mobile la barra del navegador se esconde y aparece, y
-       "100%"/"100vh" a veces queda corto o largo de más justo en
-       ese instante — con esto se ajusta siempre a lo que se ve
-       de verdad, así nunca se alcanza a ver nada detrás del velo. */
-    height:100dvh;
+    height:100dvh; /* mejor que 100vh con la barra del navegador en mobile */
     z-index:20;display:block;
     touch-action:none;                 /* que el dedo no scrollee la página */
   }
@@ -225,8 +213,6 @@
 }
 
 /* ---------- Menú ---------- */
-/* solo se ve la palabra "Menú"; al pasar el mouse (o tocar) se abre
-   un panel con las 4 secciones en columnas, todo junto */
 .menu-toggle{
   display: flex;
   align-items: center;
@@ -250,8 +236,7 @@
 .menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(2){ opacity: 0; }
 .menu-toggle[aria-expanded="true"] .menu-toggle-icon span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
 
-/* ancho completo, debajo del header. Fondo semitransparente con
-   blur, igual que el header: se sigue viendo el video moverse. */
+/* panel ancho completo, debajo del header, fondo con blur */
 .menu-panel{
   position: fixed;
   top: var(--header-h);
@@ -270,22 +255,15 @@
   transform: translateY(-10px);
   pointer-events: none;
   transition: opacity .2s var(--ease-out), transform .2s var(--ease-out);
-  /* si con todo y esto no cabe de ancho en una pantalla angosta,
-     mejor que deslice de lado a que salte a una segunda fila. */
-  overflow-x: auto;
-  /* con varias columnas y submenús largos, a veces no cabe
-     todo en el alto de la pantalla: mejor que deslice a que se
-     corte o se salga. */
-  max-height: calc(100vh - var(--header-h, 84px) - 24px);
+  overflow-x: auto; /* desliza de lado si no cabe, en vez de saltar fila */
+  max-height: calc(100vh - var(--header-h, 84px) - 24px); /* desliza en vez de cortarse */
   overflow-y: auto;
 }
 .menu-panel.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
 
 .menu-col{ display: flex; flex-direction: column; min-width: 200px; }
 
-/* el disparador es el título completo de la sección: ocupa todo el
-   ancho de la columna para que el área de toque sea grande, con el
-   ícono "+" a la derecha que gira a "×" al abrir. */
+/* título = disparador, ancho completo; la cruz gira a "×" al abrir */
 .menu-group-head{
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
@@ -297,14 +275,11 @@
   transition: color .15s var(--ease-out);
 }
 .menu-group-title:hover{ color: var(--gold); }
-/* "Avivamiento Academy" no tiene sección propia todavía, así que
-   su título no es un link, solo la etiqueta de la columna. */
+/* Avivamiento Academy: sin sección propia aún, solo etiqueta */
 .menu-group-title--plain{ cursor: default; }
 .menu-group-title--plain:hover{ color: var(--bone); }
 
-/* la cruz: gira a "×" cuando su grupo está abierto. Aparte del
-   título, así que tocar el nombre lleva a la sección y tocar la
-   cruz solo abre o cierra la lista. */
+/* cruz aparte del título: toca el nombre y vas a la sección, toca la cruz y abre/cierra */
 .menu-group-toggle{
   display: none; /* solo existe en mobile, ver media query */
   flex: none;
@@ -323,8 +298,7 @@
 .menu-group-toggle span::after{ top: 0; left: 50%; width: 1.5px; height: 100%; transform: translateX(-50%); }
 .menu-group[data-open="true"] > .menu-group-head .menu-group-toggle span::after{ transform: translateX(-50%) scaleY(0); }
 
-/* en desktop las 5 secciones siempre están abiertas de una, como
-   antes: el panel arranca ya expandido y ahí se queda. */
+/* en desktop las 5 grandes arrancan ya abiertas y así se quedan */
 .menu-group-panel{
   display: grid;
   grid-template-rows: 1fr;
@@ -343,10 +317,7 @@
 .menu-links a:hover,
 .menu-links a:focus-visible{ color: var(--gold); text-decoration: underline; }
 
-/* sub-sección (Ministerios, Eventos especiales, Ver, Escuchar,
-   Leer): agrupada bajo su H1 en el menú, pero es su propia sección
-   independiente, con su propia cruz — el título dorado ya lleva
-   directo a ella. */
+/* sub-sección dorada: su propia sección, su propia cruz */
 .menu-subgroup{ padding-bottom: 6px; }
 .menu-subgroup .menu-group-head{ margin-bottom: 4px; }
 .menu-subgroup-title{
@@ -374,10 +345,7 @@
     max-height: calc(100vh - var(--header-h));
     overflow-y: auto;
   }
-  /* en mobile sí arranca cerrado: solo las 5 secciones grandes, y
-     tocar el nombre (no un botón aparte, ya no hay cruz) despliega
-     todo lo suyo. En desktop esto no aplica, ahí queda siempre
-     abierto (ver la regla base más arriba). */
+  /* en mobile arranca cerrado, con cruz; en desktop siempre abierto */
   .menu-group-toggle{ display: flex; transition: border-color .15s var(--ease-out); }
   .menu-group-toggle:hover,
   .menu-group-toggle:active{ border-color: var(--gold); }
@@ -386,10 +354,7 @@
     transition: grid-template-rows .35s var(--ease-out);
   }
   .menu-group[data-open="true"] > .menu-group-panel{ grid-template-rows: 1fr; }
-  /* en pantallas angostas "cover" recortaba al hombre por el borde
-     izquierdo; corrido así se ve completo, y todavía se alcanza a
-     ver algo de la mujer al lado. Solo aplica en mobile, en
-     pantallas grandes se queda como estaba. */
+  /* mobile: corrido para que no corte al hombre del borde izquierdo */
   .hero-photo img{
     object-position: 38% 42%;
   }
@@ -405,8 +370,7 @@
   }
 }
 
-/* al llegar al final del hero, el logo y "Menú" crecen para que se
-   note que ya no hay más y hay que usar el menú */
+/* fin del hero: logo y "Menú" crecen para avisar que ya no hay más */
 body.hero-at-end .brand{
   transform: scale(1.35);
   transform-origin: left center;
@@ -467,8 +431,7 @@ body.hero-at-end .menu-toggle{
   display: none !important;
 }
 
-/* el hero: foto, luego video, con el versículo y los horarios
-   flotando encima, todo controlado por site.js con la rueda o el dedo */
+/* hero: foto, predica.mp4, versículo y horarios, lo mueve site.js */
 .hero-reveal{
   height: calc(100vh - var(--header-h, 84px)); /* respaldo para navegadores viejos */
   height: calc(100dvh - var(--header-h, 84px)); /* una pantalla completa de verdad en mobile */
@@ -495,24 +458,29 @@ body.hero-at-end .menu-toggle{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* si hay que recortar, que sea de la multitud, no de las cabezas.
-     el 42% vertical es el punto donde quedan justo debajo del
-     header, sin dejar un hueco vacío arriba. */
-  object-position: center 42%;
+  object-position: center 42%; /* recorta multitud, no cabezas */
 }
 
-/* la foto se desvanece más despacio que el versículo, para que el
-   cambio se sienta natural y no como un corte */
+/* video actual: se apaga a negro en la primera mitad del cambio a predica */
 .hero-video{
   position: absolute;
   inset: 0;
   z-index: 2;
-  opacity: var(--fade, 0);
+  opacity: calc(var(--fade, 0) * clamp(0, 1 - var(--predica, 0) * 2, 1));
 }
 .hero-video video{
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* predica.mp4: se actualiza cada 8 días. Aparece desde negro con un
+   leve zoom, en la segunda mitad del cambio, para que el corte se note */
+.hero-video--predica{
+  z-index: 2;
+  opacity: clamp(0, var(--predica, 0) * 2 - 1, 1);
+}
+.hero-video--predica video{
+  transform: scale(calc(1.08 - 0.08 * var(--predica, 0)));
 }
 
 /* versículo flotando sobre el video, sin fondo, abajo del todo */
@@ -545,10 +513,9 @@ body.hero-at-end .menu-toggle{
   bottom: 0;
   z-index: 3;
   padding: clamp(28px, 6vw, 64px) clamp(24px, 6vw, 96px) clamp(32px, 7vw, 80px);
-  /* mismo tipo de entrada que el versículo: sube desde abajo y
-     luego, cuando llegan los eventos, sigue subiendo y sale. */
+  /* horarios: sube desde abajo, luego sale cuando llegan los eventos */
   opacity: calc(1 - var(--events, 0));
-  transform: translateY(calc((1 - var(--exit, 0)) * 100% - var(--events, 0) * 100%));
+  transform: translateY(calc((1 - var(--schedule, 0)) * 100% - var(--events, 0) * 100%));
   pointer-events: none;
 }
 .hero-schedule .lede,
@@ -558,10 +525,7 @@ body.hero-at-end .menu-toggle{
   text-shadow: 0 2px 16px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.85);
 }
 
-/* misma tipografía del versículo grande, para que todo el sitio
-   tenga el mismo hilo gráfico:
-   Fraunces 300, clamp(2.6rem,7vw,5.4rem) para el texto blanco,
-   y en dorado cursiva 600 para la palabra resaltada */
+/* misma tipografía del versículo grande */
 .hero-schedule .lede,
 .stop .lede{
   font-family: 'Fraunces', Georgia, serif;
@@ -583,8 +547,12 @@ body.hero-at-end .menu-toggle{
 body.hero-at-end .hero-schedule .meta strong{
   font-size: clamp(1.6rem, 3vw, 2.3rem);
 }
+.hero-schedule-btn{
+  margin-top: 1.6rem;
+  pointer-events: auto;
+}
 
-/* botón dorado, texto oscuro porque el dorado es un color claro */
+/* boton: degradado naranja-morado */
 .btn-gold{
   display: inline-flex;
   align-items: center;
@@ -593,28 +561,26 @@ body.hero-at-end .hero-schedule .meta strong{
   cursor: pointer;
   padding: 14px 28px;
   border-radius: 999px;
-  background: var(--gold);
-  color: var(--ink);
+  background: linear-gradient(90deg, #D9720F 0%, #7A3D3A 50%, #241B4D 100%);
+  background-size: 160% 100%;
+  background-position: left center;
+  color: var(--bone);
   font: 700 .82rem/1 'Archivo', sans-serif;
   letter-spacing: .06em;
   text-transform: uppercase;
-  transition: transform .15s var(--ease-out), background .15s var(--ease-out);
+  transition: transform .15s var(--ease-out), background-position .25s var(--ease-out);
 }
-.btn-gold:hover{ background: #F7BE5F; }
+.btn-gold:hover{ background-position: right center; }
 .btn-gold:active{ transform: scale(0.97); }
 
-/* aviso de eventos: última capa del hero, sube desde abajo igual
-   que las demás. El botón lleva a los eventos de verdad, en
-   Reuniones. Como es la última, no le hace falta salir. */
+/* aviso de eventos: última capa del hero, sube desde abajo */
 .hero-events{
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 3;
-  /* misma imagen del footer, de borde a borde, para que se vea
-     como un bloque propio y no transparente sobre el video */
-  background-image: url('barra-footer.png');
+  background-image: url('barra-footer.png'); /* misma imagen del footer */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -655,6 +621,22 @@ body.hero-at-end .hero-schedule .meta strong{
   font-size: clamp(1.3rem, 2.6vw, 1.7rem);
   margin-bottom: .4rem;
 }
+/* Canal ABN en vivo */
+.live-player{
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1.4rem auto 0;
+  background: #000;
+}
+.live-player video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .event-desc{
   color: #E9DCCC;
   line-height: 1.6;
