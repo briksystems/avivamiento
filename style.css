@@ -1,13 +1,22 @@
+@font-face{
+  font-family: 'Paralucent';
+  src: url('paralucent-heavy.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root{
     --ink:#100D0C;          /* el velo que se agujerea */
     --gold:#F2A93B;         /* único color de acento del sitio */
     --bone:#F6F1E8;
     --deep:#2B0F08;
+    --font:'Avenir Next','Avenir','Nunito Sans',system-ui,sans-serif; /* Avenir, con Nunito Sans de respaldo */
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
-    font-family:'Archivo',system-ui,sans-serif;
+    font-family:var(--font);
     background:var(--deep);
     color:var(--bone);
     overflow:hidden;              /* el JS lo libera al terminar */
@@ -49,9 +58,9 @@
   }
   /* título solo, dorado, mientras la parada no tiene más contenido */
   .stop-title{
-    font-family: 'Fraunces', Georgia, serif;
-    font-style: italic;
-    font-weight: 600;
+    font-family: var(--font);
+    font-style: normal;
+    font-weight: 800;
     font-size: clamp(2.6rem, 7vw, 5.4rem);
     line-height: 1.1;
     color: var(--gold);
@@ -85,10 +94,10 @@
     color:var(--gold);margin-bottom:1.5rem;
   }
   h1{
-    font-family:'Fraunces',Georgia,serif;font-weight:300;
+    font-family:var(--font);font-weight:300;
     font-size:clamp(2.6rem,7vw,5.4rem);line-height:1.1;letter-spacing:-.02em;
   }
-  h1 em{font-style:italic;font-weight:600;color:var(--gold)}
+  h1 em{font-style:normal;font-weight:800;color:var(--gold)} /* amarillo, avenir pesada */
   .lede{
     margin-top:1.6rem;max-width:44ch;font-size:clamp(1rem,1.6vw,1.15rem);
     line-height:1.65;color:#E9DCCC;
@@ -102,7 +111,7 @@
   .meta div strong{font-weight:500;font-size:1rem}
   #replay{
     position:fixed;right:20px;bottom:20px;z-index:50;
-    font:500 .78rem/1 'Archivo',sans-serif;letter-spacing:.06em;
+    font:500 .78rem/1 var(--font);letter-spacing:.06em;
     padding:12px 18px;border:1px solid rgba(246,241,232,.3);
     border-radius:999px;background:rgba(0,0,0,.35);color:var(--bone);
     cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s;
@@ -192,7 +201,7 @@
   border: none;
   cursor: pointer;
   padding: 8px 4px;
-  font: 500 .78rem/1 'Archivo', sans-serif;
+  font: 500 .78rem/1 var(--font);
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--bone);
@@ -221,7 +230,7 @@
   border: none;
   cursor: pointer;
   padding: 8px 4px;
-  font: 500 .78rem/1 'Archivo', sans-serif;
+  font: 500 .78rem/1 var(--font);
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--bone);
@@ -268,7 +277,7 @@
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
 .menu-group-title{
-  font-family: 'Fraunces', serif; font-weight: 600;
+  font-family: var(--font); font-weight: 600;
   font-size: clamp(1.2rem, 1.8vw, 1.5rem);
   color: var(--bone);
   text-decoration: none;
@@ -304,10 +313,11 @@
   grid-template-rows: 1fr;
 }
 .menu-group-panel-inner{ overflow: hidden; }
+.menu-subgroup .menu-group-panel-inner{ padding-left: 1.4rem; } /* sangría: solo lo que va debajo de un amarillo */
 
 .menu-links{ display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
 .menu-links a{
-  font: 500 .85rem/1.4 'Archivo', sans-serif;
+  font: 500 .85rem/1.4 var(--font);
   color: rgba(246,241,232,.75);
   text-decoration: none;
   text-underline-offset: 3px;
@@ -322,7 +332,7 @@
 .menu-subgroup .menu-group-head{ margin-bottom: 4px; }
 .menu-subgroup-title{
   display: block;
-  font: 700 .68rem/1 'Archivo', sans-serif;
+  font: 700 .68rem/1 var(--font);
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--gold);
@@ -400,7 +410,7 @@ body.hero-at-end .menu-toggle{
 }
 .site-footer p{
   margin: 0;
-  font: 500 .7rem/1 'Archivo', sans-serif;
+  font: 500 .7rem/1 var(--font);
   letter-spacing: .06em;
   color: rgba(246,241,232,.5);
 }
@@ -410,7 +420,7 @@ body.hero-at-end .menu-toggle{
 /* ---------- Versículo (hero) ---------- */
 .verse-lead{
   display: block;
-  font-family: 'Archivo', sans-serif;
+  font-family: var(--font);
   font-weight: 400;
   font-size: clamp(.95rem, 1.6vw, 1.1rem);
   font-style: italic;
@@ -483,6 +493,18 @@ body.hero-at-end .menu-toggle{
   transform: scale(calc(1.08 - 0.08 * var(--predica, 0)));
 }
 
+/* versículo completo en Paralucent Heavy, derecha; amarillo solo ejército y Espíritu */
+.hero-verse .verse,
+.hero-verse .verse em{
+  font-family: 'Paralucent', var(--font);
+  font-style: normal;
+  font-weight: 800;
+}
+/* tamaño del versículo: cambia estos números (mínimo, según el ancho, máximo) */
+.hero-verse .verse{
+  font-size: clamp(2rem, 5.6vw, 4.1rem);
+}
+
 /* versículo flotando sobre el video, sin fondo, abajo del todo */
 .hero-verse{
   position: absolute;
@@ -528,7 +550,7 @@ body.hero-at-end .menu-toggle{
 /* misma tipografía del versículo grande */
 .hero-schedule .lede,
 .stop .lede{
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font);
   font-weight: 300;
   font-size: clamp(2.6rem, 7vw, 5.4rem);
   line-height: 1.1;
@@ -536,8 +558,8 @@ body.hero-at-end .menu-toggle{
 }
 .hero-schedule .lede em,
 .stop .lede em{
-  font-style: italic;
-  font-weight: 600;
+  font-style: normal;
+  font-weight: 800;
   color: var(--gold);
 }
 .hero-schedule .meta strong{
@@ -554,6 +576,7 @@ body.hero-at-end .hero-schedule .meta strong{
 
 /* boton: degradado naranja-morado */
 .btn-gold{
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -565,7 +588,7 @@ body.hero-at-end .hero-schedule .meta strong{
   background-size: 160% 100%;
   background-position: left center;
   color: var(--bone);
-  font: 700 .82rem/1 'Archivo', sans-serif;
+  font: 700 .82rem/1 var(--font);
   letter-spacing: .06em;
   text-transform: uppercase;
   transition: transform .15s var(--ease-out), background-position .25s var(--ease-out);
@@ -616,7 +639,7 @@ body.hero-at-end .hero-schedule .meta strong{
   filter: grayscale(1);
 }
 .event-title{
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font);
   font-weight: 300;
   font-size: clamp(1.3rem, 2.6vw, 1.7rem);
   margin-bottom: .4rem;
@@ -645,4 +668,41 @@ body.hero-at-end .hero-schedule .meta strong{
 .events-placeholder{
   color: rgba(246,241,232,.55);
   font-style: italic;
+}
+
+/* whatsapp flotante, abajo a la derecha */
+.wa-float{
+  position: fixed;
+  right: 20px;
+  bottom: 44px;
+  z-index: 16;
+  width: 60px; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: #25D366;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.5);
+  opacity: 0;
+  pointer-events: none;
+}
+.wa-float svg{ width: 32px; height: 32px; }
+.wa-float.show{ opacity: 1; pointer-events: auto; transition: opacity .4s var(--ease-out), transform .15s var(--ease-out); }
+.wa-float:hover{ transform: scale(1.08); }
+.wa-float:active{ transform: scale(0.95); }
+
+/* horarios con la misma letra del versículo (al final para que gane) */
+.hero-schedule .lede,
+.hero-schedule .lede em,
+.hero-schedule .meta strong{
+  font-family: 'Paralucent', var(--font);
+  font-style: normal;
+  font-weight: 800;
+}
+/* horarios: mismo tamaño que el versículo, días en amarillo */
+.hero-schedule .lede{
+  font-size: clamp(2rem, 5.6vw, 4.1rem);
+}
+.hero-schedule .meta span{
+  color: var(--gold);
 }

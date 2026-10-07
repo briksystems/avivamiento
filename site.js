@@ -300,7 +300,6 @@
   const heroReveal = document.getElementById('hero-reveal');
   const videoActual = heroReveal && heroReveal.querySelector('.hero-video:not(.hero-video--predica) video');
   const videoPredica = heroReveal && heroReveal.querySelector('.hero-video--predica video');
-  const btnVerPredica = document.getElementById('btn-ver-predica');
   if (!heroReveal) return;
 
   const PHASE = 2 / 3;             // dura cada tramo
@@ -310,7 +309,6 @@
   const TOUCH_TO_END = 190;
   const FOLLOW_MANUAL = 0.16; // velocidad con rueda/dedo, ya manual
   const AT_END_THRESHOLD = MAX_PROGRESS - 0.02;
-  const PREDICA_STOP = PHASE * 3; // "video limpio" al que vuelve el botón Ver prédica
 
   let target = 0;
   let shown = 0;
@@ -451,15 +449,6 @@
   navUp.addEventListener('click', () => addDelta(-PHASE));
   navDown.addEventListener('click', () => addDelta(PHASE));
 
-  if (btnVerPredica) {
-    btnVerPredica.addEventListener('click', () => {
-      if (autoPlaying) return;
-      pausedAt = null;
-      target = PREDICA_STOP;
-      kick();
-    });
-  }
-
   heroReveal.addEventListener('wheel', (e) => {
     if (autoPlaying) { e.preventDefault(); return; }
     const goingDown = e.deltaY > 0;
@@ -540,4 +529,17 @@
       if (window.Hls) { clearInterval(check); start(); }
     }, 200);
   }
+})();
+
+// whatsapp: aparece cuando termina la intro
+(function initWhatsapp() {
+  const wa = document.querySelector('.wa-float');
+  const veil = document.getElementById('veil');
+  if (!wa) return;
+  const done = () => !veil || veil.style.display === 'none';
+  if (done()) { wa.classList.add('show'); return; }
+  const obs = new MutationObserver(() => {
+    if (done()) { wa.classList.add('show'); obs.disconnect(); }
+  });
+  obs.observe(veil, { attributes: true, attributeFilter: ['style'] });
 })();
